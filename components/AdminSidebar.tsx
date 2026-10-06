@@ -18,42 +18,13 @@ import {
 export function AdminSidebar() {
   const pathname = usePathname();
 
-  const navItems = [
-    {
-      label: "Executive Overview",
-      href: "/",
-      icon: LayoutDashboard,
-    },
-    {
-      label: "2257 Compliance Vault",
-      href: "/compliance",
-      icon: ShieldCheck,
-      badge: "3 Pending",
-    },
-    {
-      label: "Content Moderation & DMCA",
-      href: "/moderation",
-      icon: AlertTriangle,
-      badge: "1 Report",
-      badgeColor: "bg-rose-500/20 text-rose-300 border-rose-500/30",
-    },
-    {
-      label: "Treasury & Monetization",
-      href: "/treasury",
-      icon: Wallet,
-      badge: "10% Rake",
-      badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    },
-    {
-      label: "Bunny CDN Telemetry",
-      href: "/cdn",
-      icon: Activity,
-    },
-    {
-      label: "Creator & User Registry",
-      href: "/creators",
-      icon: Users,
-    },
+  const navItems: { label: string; href: string; icon: typeof LayoutDashboard; badge?: string; badgeColor?: string }[] = [
+    { label: "Overview", href: "/", icon: LayoutDashboard },
+    { label: "2257 Creator Verification", href: "/compliance", icon: ShieldCheck },
+    { label: "Content Reports", href: "/moderation", icon: AlertTriangle },
+    { label: "Treasury & Payouts", href: "/treasury", icon: Wallet },
+    { label: "Catalogue", href: "/catalogue", icon: Activity },
+    { label: "Creator Registry", href: "/creators", icon: Users },
   ];
 
   return (
@@ -108,27 +79,10 @@ export function AdminSidebar() {
         </nav>
       </div>
 
-      {/* Footer System Status */}
+      {/* Footer */}
       <div className="p-4 border-t border-white/5 space-y-3">
-        <div className="rounded-2xl border border-white/5 bg-zinc-900/60 p-3 space-y-2">
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-zinc-400">PostgreSQL</span>
-            <span className="flex items-center gap-1 text-emerald-400 font-mono">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Connected
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-[11px]">
-            <span className="text-zinc-400">Bunny.net Stream</span>
-            <span className="flex items-center gap-1 text-emerald-400 font-mono">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              Operational
-            </span>
-          </div>
-        </div>
-
         <a
-          href="http://localhost:3000"
+          href={process.env.NEXT_PUBLIC_OROCHIA_APP_URL || "http://localhost:3000"}
           target="_blank"
           rel="noreferrer"
           className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"

@@ -1,39 +1,27 @@
-# 🛡️ OROCHIA ADMIN — Control Plane & Operations Governance
+# OROCHIA ADMIN — Governance scope (agent-neutral)
 
-> Operational contract and architecture specification for **`orochia-admin`**, the administrative control plane, 18 U.S.C. § 2257 compliance vault, Bunny.net CDN telemetry monitor, and multi-tier treasury settlement station for the Orochia ecosystem.
+> Operator console of [Orochia](https://github.com/krizaka/orochia). The platform contract is
+> [`krizaka/orochia/AGENTS.md`](https://github.com/krizaka/orochia/blob/main/AGENTS.md); this file
+> scopes it to the console.
 
----
+## 1. What this is
 
-## 1. Role & Identity
+- Next.js 14 App Router, port **3001**. **No database of its own**: every figure and action goes
+  through Orochia's `/api/admin/*` endpoints (and `/api/platform/treasury`, `/api/bunny/analytics`).
+- Screens: Overview · 2257 Creator Verification · Content Reports · Treasury & Payouts · Catalogue ·
+  Creator Registry.
 
-- **Repository**: `krizaka/orochia-admin`
-- **Application**: Next.js 14+ App Router, TypeScript, Tailwind CSS, Lucide Icons.
-- **Port Allocation**: Runs on `http://localhost:3001` to operate concurrently with the consumer platform on `http://localhost:3000`.
-- **Purpose**:
-  1. **18 U.S.C. § 2257 Compliance Vault**: Federal record keeper custody verification, primary producer government ID validation, certified federal audit export.
-  2. **DMCA & Emergency Triage**: Single-click worldwide Bunny CDN edge purge and instant takedown desk.
-  3. **Platform Treasury & Monetization Desk**: 10% protocol rake extraction, $49 federal onboarding audit fee, Sanctuary Spotlight sponsored placement management, 1.5% express payout processing, batch multi-sig settlement.
-  4. **Bunny.net Stream Telemetry**: Real-time 114 PoP edge metrics, bandwidth auditing, DRM configuration, video collection governance.
-  5. **Creator & User Registry**: Role-based access control (RBAC), verification badges, account lifecycle enforcement.
+## 2. Security invariants
 
----
+- Sign-in goes through Orochia (`/api/auth/login`); the session is kept **only if the account is
+  ADMIN**, in an httpOnly, SameSite=Strict cookie (8 h). `middleware.ts` protects every route; each API
+  call re-validates the session and an expired or non-admin session is sent back to `/login`.
+- Mutations are **server actions** calling Orochia; the browser never holds the Orochia session.
+- No screen renders invented data. Anything Orochia does not record (CDN bandwidth, edge PoPs…) is
+  linked to the provider's dashboard, not simulated.
+- Responses carry `X-Robots-Tag: noindex` and frame denial. Deploy the console on a private network or
+  behind an IP allow-list.
 
-## 2. Local Development & DevX
+## 3. Definition of done
 
-```bash
-# Install dependencies
-npm install
-
-# Start Admin Control Plane on Port 3001
-npm run dev -- -p 3001
-```
-
-- When running locally, the consumer app runs on `http://localhost:3000` and the admin app runs on `http://localhost:3001`.
-- Fast switching links exist in both headers and navigation bars.
-
----
-
-## 3. Security & Access Control
-
-- All routes are protected by administrative session verification (`role === "ADMIN"`).
-- Destructive actions (Emergency CDN Purge, Performer Suspension, Treasury Batch Settlement) require explicit confirmation and audit log generation.
+`npm run lint`, `npx tsc --noEmit` and `npm run build` are green; every new screen reads Orochia's API.

@@ -7,3 +7,5 @@ build/
 .env
 .env.local
 .env.production.local
+*.tsbuildinfo
+.env*.local
