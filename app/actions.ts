@@ -39,3 +39,29 @@ export async function updatePayout(formData: FormData) {
   revalidatePath("/treasury");
   revalidatePath("/");
 }
+
+/** Takes a video down with a recorded reason (DMCA, terms, a confirmed report), or restores it. */
+export async function moderateVideo(formData: FormData) {
+  const action = String(formData.get("action"));
+  await orochia(`/api/admin/videos/${String(formData.get("id"))}`, {
+    method: "PATCH",
+    body: JSON.stringify(action === "remove" ? { action, reason: String(formData.get("reason") ?? "").trim() } : { action }),
+  });
+  revalidatePath("/catalogue");
+  revalidatePath("/moderation");
+  revalidatePath("/");
+}
+
+/** Suspends or reinstates an account, or changes its role. */
+export async function manageUser(formData: FormData) {
+  const action = String(formData.get("action"));
+  const body =
+    action === "suspend"
+      ? { action, reason: String(formData.get("reason") ?? "").trim() }
+      : action === "set-role"
+        ? { action, role: String(formData.get("role")) }
+        : { action };
+  await orochia(`/api/admin/users/${String(formData.get("id"))}`, { method: "PATCH", body: JSON.stringify(body) });
+  revalidatePath("/users");
+  revalidatePath("/creators");
+}

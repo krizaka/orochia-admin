@@ -10,6 +10,7 @@ import {
   Wallet,
   Activity,
   Users,
+  UserCog,
   ExternalLink,
   CheckCircle2
 } from "lucide-react";
@@ -25,6 +26,7 @@ export function AdminSidebar() {
     { label: "Treasury & Payouts", href: "/treasury", icon: Wallet },
     { label: "Catalogue", href: "/catalogue", icon: Activity },
     { label: "Creator Registry", href: "/creators", icon: Users },
+    { label: "Accounts", href: "/users", icon: UserCog },
   ];
 
   return (

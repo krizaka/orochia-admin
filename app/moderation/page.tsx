@@ -1,5 +1,5 @@
 import { orochia, day } from "@/lib/orochia";
-import { updateReport } from "@/app/actions";
+import { moderateVideo, updateReport } from "@/app/actions";
 import { Empty, PageTitle, Panel, button, td, th } from "@/components/ui";
 
 interface Report {
@@ -87,6 +87,13 @@ export default async function ModerationPage({ searchParams }: { searchParams: {
                         <button name="status" value="OPEN" className={button}>Reopen</button>
                       )}
                     </form>
+                    {r.videoId && r.status !== "RESOLVED" && (
+                      <form action={moderateVideo} className="mt-1.5">
+                        <input type="hidden" name="id" value={r.videoId} />
+                        <input type="hidden" name="reason" value={`Report: ${REASON[r.reason] ?? r.reason}`} />
+                        <button name="action" value="remove" className={`${button} border-rose-500/40 hover:bg-rose-600`}>Take the video down</button>
+                      </form>
+                    )}
                   </td>
                 </tr>
               ))}
