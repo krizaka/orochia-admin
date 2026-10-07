@@ -11,9 +11,9 @@ import {
   Activity,
   Users,
   ExternalLink,
-  Flame,
   CheckCircle2
 } from "lucide-react";
+import { OrochiaLogo } from "@/components/OrochiaLogo";
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -32,9 +32,7 @@ export function AdminSidebar() {
       <div>
         {/* Brand */}
         <div className="h-16 flex items-center px-6 border-b border-white/10 gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-violet-600 via-fuchsia-600 to-pink-500 text-white shadow-lg shadow-violet-500/25">
-            <Flame className="h-5 w-5 fill-white" />
-          </div>
+          <OrochiaLogo size={40} />
           <div>
             <span className="text-sm font-black tracking-wider text-white font-display">
               OROCHIA<span className="text-violet-400">.</span>

@@ -1,18 +1,23 @@
+<!-- krizaka-header -->
 <div align="center">
 
-# 🛡️ OROCHIA CONTROL PLANE
-### Operations, Compliance Vault & Multi-Stream Treasury Console
+<img src=".github/assets/orochia-logo.svg" alt="Orochia" width="132">
+
+# Orochia Admin
+
+**Creators get paid. Every cent, exactly once.**
+
+The operator console of Orochia: 18 U.S.C. § 2257 creator verification, content-report triage, treasury and payouts — a server-side BFF over the Orochia admin API.
 
 [![CI](https://github.com/krizaka/orochia-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/orochia-admin/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js-14_App_Router-black?logo=next.js)](https://nextjs.org/)
-[![Port](https://img.shields.io/badge/Local_Port-3001-violet)](http://localhost:3001)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Orochia](https://img.shields.io/badge/part%20of-Orochia-d946ef)](https://www.krizaka.com/en/products/orochia#guarantees)
+[![Docs](https://img.shields.io/badge/docs-krizaka.com-6366f1)](https://www.krizaka.com/en/products/orochia/docs/getting_started)
 
-The dedicated control plane and federal compliance vault for [**Orochia**](https://github.com/krizaka/orochia), engineered by **Krizaka**.
-
-[Consumer App](https://github.com/krizaka/orochia) • [Design System](https://github.com/krizaka/orochia-design-system) • [Architecture Guide](AGENTS.md)
+[Documentation](https://www.krizaka.com/en/products/orochia/docs/getting_started) · [Website](https://www.krizaka.com) · [Krizaka on GitHub](https://github.com/krizaka)
 
 </div>
+<!-- /krizaka-header -->
 
 ---
 
