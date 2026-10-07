@@ -7,7 +7,7 @@
 
 ## 1. What this repository is
 
-- A Next.js 14 **server-side BFF**: it has **no database and no secret of its own**. Every figure and every action
+- A Next.js 16 **server-side BFF**: it has **no database and no secret of its own**. Every figure and every action
   goes through Orochia's `/api/admin/*` endpoints with the operator's ADMIN session.
 - The session lives in the httpOnly `orochia_admin_session` cookie (`lib/orochia.ts`); it never reaches client code.
   An expired, suspended or non-admin session is sent back to `/login`.

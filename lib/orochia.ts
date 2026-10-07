@@ -27,7 +27,7 @@ export class ApiError extends Error {
 
 /** Calls Orochia with the operator's session; an expired or non-admin session goes back to /login. */
 export async function orochia<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = cookies().get(ADMIN_COOKIE)?.value;
+  const token = (await cookies()).get(ADMIN_COOKIE)?.value;
   if (!token) redirect("/login");
   const res = await fetch(`${apiBaseUrl()}${path}`, {
     ...init,
@@ -52,7 +52,7 @@ export interface AdminIdentity {
 
 /** The signed-in operator, or null (no cookie / session no longer valid / not an admin). */
 export async function currentAdmin(): Promise<AdminIdentity | null> {
-  const token = cookies().get(ADMIN_COOKIE)?.value;
+  const token = (await cookies()).get(ADMIN_COOKIE)?.value;
   if (!token) return null;
   try {
     const res = await fetch(`${apiBaseUrl()}/api/auth/me`, {

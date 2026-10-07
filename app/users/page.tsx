@@ -23,7 +23,8 @@ const FILTERS = [
   ["Suspended", "suspended=true"],
 ] as const;
 
-export default async function UsersPage({ searchParams }: { searchParams: { role?: string; suspended?: string; q?: string } }) {
+export default async function UsersPage(props: { searchParams: Promise<{ role?: string; suspended?: string; q?: string }> }) {
+  const searchParams = await props.searchParams;
   const params = new URLSearchParams();
   if (searchParams.role) params.set("role", searchParams.role);
   if (searchParams.suspended) params.set("suspended", searchParams.suspended);

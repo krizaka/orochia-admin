@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const ADMIN_COOKIE = "orochia_admin_session";
 
 /** Every page requires an operator session; the session itself is re-validated by each API call. */
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (pathname.startsWith("/login") || pathname.startsWith("/api/session")) return NextResponse.next();
   if (!req.cookies.get(ADMIN_COOKIE)?.value) {

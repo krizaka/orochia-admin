@@ -23,7 +23,8 @@ interface CatalogueVideo {
 
 const STATES = ["all", "listed", "removed"] as const;
 
-export default async function CataloguePage({ searchParams }: { searchParams: { state?: string; q?: string } }) {
+export default async function CataloguePage(props: { searchParams: Promise<{ state?: string; q?: string }> }) {
+  const searchParams = await props.searchParams;
   const state = STATES.includes(searchParams.state as (typeof STATES)[number]) ? searchParams.state! : "all";
   const q = (searchParams.q ?? "").slice(0, 100);
   const params = new URLSearchParams({ state, ...(q ? { q } : {}) });

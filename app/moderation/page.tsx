@@ -21,7 +21,8 @@ const REASON: Record<string, string> = {
   FRAUD_SCAM: "Fraud / scam",
 };
 
-export default async function ModerationPage({ searchParams }: { searchParams: { status?: string } }) {
+export default async function ModerationPage(props: { searchParams: Promise<{ status?: string }> }) {
+  const searchParams = await props.searchParams;
   const status = searchParams.status === "all" ? "" : searchParams.status ?? "OPEN";
   const { reports } = await orochia<{ reports: Report[] }>(`/api/admin/reports${status ? `?status=${status}` : ""}`);
   return (
