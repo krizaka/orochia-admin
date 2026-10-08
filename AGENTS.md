@@ -21,7 +21,9 @@
 - Mutations are **server actions** (`app/actions.ts`) that call the API, then `revalidatePath` the screens they change.
 - Every operator decision that removes something records its **reason** (takedown, suspension, failed payout).
 - Pages render empty states, never sample data. Links to the consumer app use `NEXT_PUBLIC_OROCHIA_APP_URL`.
-- The brand mark is `components/OrochiaLogo.tsx`, identical to the design system's.
+- UI comes from [`@krizaka/orochia-design-system`](https://github.com/krizaka/orochia-design-system) on npm (the
+  `OrochiaLogo`, `buttonClass` for actions, the Tailwind CSS v4 `theme.css`); never a copy. A missing component is
+  added to the design system first. Tailwind CSS v4 is configured in `app/globals.css` (no `tailwind.config.js`).
 
 ## 3. Run
 

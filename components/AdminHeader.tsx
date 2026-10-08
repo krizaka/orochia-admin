@@ -20,7 +20,7 @@ export function AdminHeader({ admin }: { admin: AdminIdentity }) {
         Administrator
       </span>
       <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold">
+        <div className="h-8 w-8 rounded-xl bg-linear-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold">
           {initials}
         </div>
         <div className="hidden sm:block text-left">

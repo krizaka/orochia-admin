@@ -14,7 +14,7 @@ import {
   ExternalLink,
   CheckCircle2
 } from "lucide-react";
-import { OrochiaLogo } from "@/components/OrochiaLogo";
+import { OrochiaLogo } from "@krizaka/orochia-design-system";
 
 export function AdminSidebar() {
   const pathname = usePathname();

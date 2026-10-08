@@ -2,7 +2,7 @@
 
 import React, { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { OrochiaLogo } from "@/components/OrochiaLogo";
+import { OrochiaLogo } from "@krizaka/orochia-design-system";
 
 function LoginForm() {
   const router = useRouter();
@@ -45,7 +45,7 @@ function LoginForm() {
           placeholder="E-mail or username"
           autoComplete="username"
           required
-          className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-violet-500 focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-violet-500 focus:outline-hidden"
         />
         <input
           type="password"
@@ -54,13 +54,13 @@ function LoginForm() {
           placeholder="Password"
           autoComplete="current-password"
           required
-          className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-violet-500 focus:outline-none"
+          className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-violet-500 focus:outline-hidden"
         />
         {error && <p role="alert" className="text-xs text-rose-300">{error}</p>}
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
+          className="w-full rounded-xl bg-linear-to-r from-violet-600 to-fuchsia-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
         >
           {busy ? "Signing in…" : "Sign in"}
         </button>

@@ -1,4 +1,5 @@
 import React from "react";
+import { buttonClass } from "@krizaka/orochia-design-system/classes";
 
 export function PageTitle({ title, subtitle }: { title: string; subtitle: string }) {
   return (
@@ -31,5 +32,5 @@ export function Panel({ children }: { children: React.ReactNode }) {
 
 export const th = "py-2 pr-4 text-left text-[10px] uppercase tracking-wider text-zinc-500 font-semibold";
 export const td = "py-2.5 pr-4 text-xs text-zinc-300 align-top";
-export const button =
-  "rounded-lg border border-white/10 bg-zinc-800 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-zinc-700";
+/** Table and form actions: the kit's secondary button, small. */
+export const button = buttonClass({ variant: "secondary", size: "sm" });
