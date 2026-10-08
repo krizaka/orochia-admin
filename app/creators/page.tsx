@@ -1,6 +1,7 @@
 import { orochia, day, money } from "@/lib/orochia";
 import { setCreatorVerified } from "@/app/actions";
-import { Empty, PageTitle, Panel, button, td, th } from "@/components/ui";
+import { Empty, PageTitle, Panel, td, th } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface Creator {
   id: string;
@@ -45,14 +46,26 @@ export default async function CreatorsPage() {
                   <td className={`${td} font-mono`}>{money(c.totalTipsEarnedCents)}</td>
                   <td className={td}>{c.isVerified ? <span className="text-emerald-400">verified</span> : <span className="text-amber-300">pending</span>}</td>
                   <td className={td}>
-                    <form action={setCreatorVerified}>
-                      <input type="hidden" name="id" value={c.id} />
-                      {c.isVerified ? (
-                        <button name="isVerified" value="false" className={`${button} text-rose-300`}>Suspend uploads</button>
-                      ) : (
-                        <button name="isVerified" value="true" className={`${button} text-emerald-300`}>Approve</button>
-                      )}
-                    </form>
+                    {c.isVerified ? (
+                      <ConfirmDialog
+                        action={setCreatorVerified}
+                        fields={{ id: c.id, isVerified: "false" }}
+                        trigger={{ label: "Suspend uploads", tone: "danger" }}
+                        title={`Suspend the uploads of @${c.username}`}
+                        description={<>Their 2257 verification is withdrawn: they can no longer open upload sessions until an operator approves their records again. Published videos stay online.</>}
+                        confirmLabel="Suspend uploads"
+                      />
+                    ) : (
+                      <ConfirmDialog
+                        action={setCreatorVerified}
+                        fields={{ id: c.id, isVerified: "true" }}
+                        trigger={{ label: "Approve", tone: "primary" }}
+                        tone="primary"
+                        title={`Approve @${c.username}`}
+                        description={<>Confirm that their 18 U.S.C. § 2257 records were checked: they can upload videos and stories from now on.</>}
+                        confirmLabel="Records checked — approve"
+                      />
+                    )}
                   </td>
                 </tr>
               ))}

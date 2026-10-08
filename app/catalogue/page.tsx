@@ -1,6 +1,7 @@
 import { orochia, day } from "@/lib/orochia";
 import { moderateVideo } from "@/app/actions";
 import { Empty, PageTitle, Panel, Stat, button, td, th } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface Catalogue {
   videosByStatus: Record<string, number>;
@@ -93,17 +94,27 @@ export default async function CataloguePage(props: { searchParams: Promise<{ sta
                   <td className={`${td} font-mono ${v.openReports > 0 ? "font-bold text-rose-300" : ""}`}>{v.openReports}</td>
                   <td className={`${td} font-mono`}>{v.viewsCount.toLocaleString("en-US")}</td>
                   <td className={td}>
-                    <form action={moderateVideo} className="flex gap-1.5">
-                      <input type="hidden" name="id" value={v.id} />
-                      {v.removedAt ? (
-                        <button name="action" value="restore" className={button}>Restore</button>
-                      ) : (
-                        <>
-                          <input name="reason" required minLength={3} placeholder="Reason" className="w-36 rounded-lg border border-white/10 bg-zinc-900 px-2 py-1 text-[11px] text-white" />
-                          <button name="action" value="remove" className={`${button} border-rose-500/40 hover:bg-rose-600`}>Take down</button>
-                        </>
-                      )}
-                    </form>
+                    {v.removedAt ? (
+                      <ConfirmDialog
+                        action={moderateVideo}
+                        fields={{ id: v.id, action: "restore" }}
+                        trigger={{ label: "Restore", tone: "primary" }}
+                        tone="primary"
+                        title="Restore the video"
+                        description={<>“{v.title}” is listed and playable again under its own audience rules. The takedown reason is cleared.</>}
+                        confirmLabel="Restore"
+                      />
+                    ) : (
+                      <ConfirmDialog
+                        action={moderateVideo}
+                        fields={{ id: v.id, action: "remove" }}
+                        trigger={{ label: "Take down", tone: "danger" }}
+                        title="Take the video down"
+                        description={<>“{v.title}” by @{v.creatorUsername} disappears everywhere and its playback is refused, for its author too. An open auction on it is cancelled and its bid released. Reversible from this screen.</>}
+                        reason={{ label: "Reason (recorded)", placeholder: "DMCA notice #…, terms violation, confirmed report…" }}
+                        confirmLabel="Take down"
+                      />
+                    )}
                   </td>
                 </tr>
               ))}

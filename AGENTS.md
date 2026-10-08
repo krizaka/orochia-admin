@@ -11,15 +11,25 @@
   goes through Orochia's `/api/admin/*` endpoints with the operator's ADMIN session.
 - The session lives in the httpOnly `orochia_admin_session` cookie (`lib/orochia.ts`); it never reaches client code.
   An expired, suspended or non-admin session is sent back to `/login`.
-- Screens: overview · 2257 creator verification · content reports · catalogue (takedown / restore) · treasury &
-  payouts · creator registry · accounts (suspend / reinstate / role).
+- Screens: overview · 2257 creator verification · content reports · catalogue (takedown / restore) · auctions
+  (status, money held, cancel with a reason) · treasury & payouts · creator registry · accounts (suspend / reinstate /
+  role) · platform & database (environment, migration history, rows per table, backups, factory reset).
+- Desktop is the target: tables and dialogs are laid out for a wide screen.
 
 ## 2. Rules
 
 - **A capability is an Orochia admin endpoint first.** This console never computes money, access or compliance
   state itself; it renders what the API returns and posts what the operator decides.
 - Mutations are **server actions** (`app/actions.ts`) that call the API, then `revalidatePath` the screens they change.
-- Every operator decision that removes something records its **reason** (takedown, suspension, failed payout).
+- Every operator decision that removes something records its **reason** (takedown, suspension, failed payout,
+  cancelled auction).
+- **Every decision is confirmed in a dialog** (`components/ConfirmDialog.tsx`, the kit's `Sheet`): it says what will
+  happen, collects the reason or reference, shows the API's refusal in place. What cannot be undone asks the operator to
+  type a phrase (the factory reset: `reset <database>`), and offers a backup first. Only benign, reversible steps
+  (start review, reopen) run in one click (`direct`).
+- **Factory reset** is an Orochia endpoint (`/api/admin/platform/reset`), refused unless the deployment sets
+  `OROCHIA_ALLOW_DATABASE_RESET=true` and is not the indexed production. Backups are gzipped JSON in Orochia's private
+  storage, downloaded through this console's `/api/backups/[name]` (the session never reaches the browser).
 - Pages render empty states, never sample data. Links to the consumer app use `NEXT_PUBLIC_OROCHIA_APP_URL`.
 - UI comes from [`@krizaka/orochia-design-system`](https://github.com/krizaka/orochia-design-system) on npm (the
   `OrochiaLogo`, `buttonClass` for actions, the Tailwind CSS v4 `theme.css`); never a copy. A missing component is

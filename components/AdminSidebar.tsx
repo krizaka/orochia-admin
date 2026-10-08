@@ -12,7 +12,8 @@ import {
   Users,
   UserCog,
   ExternalLink,
-  CheckCircle2
+  Gavel,
+  Database,
 } from "lucide-react";
 import { OrochiaLogo } from "@krizaka/orochia-design-system";
 
@@ -25,8 +26,10 @@ export function AdminSidebar() {
     { label: "Content Reports", href: "/moderation", icon: AlertTriangle },
     { label: "Treasury & Payouts", href: "/treasury", icon: Wallet },
     { label: "Catalogue", href: "/catalogue", icon: Activity },
+    { label: "Auctions", href: "/auctions", icon: Gavel },
     { label: "Creator Registry", href: "/creators", icon: Users },
     { label: "Accounts", href: "/users", icon: UserCog },
+    { label: "Platform & Database", href: "/platform", icon: Database },
   ];
 
   return (

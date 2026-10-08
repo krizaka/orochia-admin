@@ -1,6 +1,7 @@
 import { orochia, day, money } from "@/lib/orochia";
 import { updatePayout } from "@/app/actions";
-import { Empty, PageTitle, Panel, Stat, button, td, th } from "@/components/ui";
+import { Empty, PageTitle, Panel, Stat, td, th } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface Treasury {
   protocolRakePercent: number;
@@ -68,17 +69,30 @@ export default async function TreasuryPage() {
                   <td className={`${td} font-mono break-all`}>{p.payoutMethod} · {p.payoutDestination}</td>
                   <td className={td}>{p.status.replace(/_/g, " ").toLowerCase()}</td>
                   <td className={td}>
-                    <form action={updatePayout} className="flex flex-wrap gap-1.5">
-                      <input type="hidden" name="id" value={p.id} />
-                      <input
-                        name="note"
-                        placeholder="Transfer ref. / failure reason"
-                        className="w-44 rounded-lg border border-white/10 bg-zinc-950 px-2 py-1 text-[11px] text-white"
+                    <div className="flex flex-wrap gap-1.5">
+                      {p.status === "REQUESTED" && (
+                        <ConfirmDialog direct action={updatePayout} fields={{ id: p.id, status: "UNDER_REVIEW" }} trigger={{ label: "Review" }} />
+                      )}
+                      <ConfirmDialog
+                        action={updatePayout}
+                        fields={{ id: p.id, status: "SETTLED" }}
+                        trigger={{ label: "Mark settled", tone: "primary" }}
+                        tone="primary"
+                        title={`Settle ${money(p.amountCents)} to @${p.creatorUsername}`}
+                        description={<>Confirm that the transfer was sent to {p.payoutMethod} · <span className="font-mono">{p.payoutDestination}</span>. This closes the payout for good.</>}
+                        reason={{ label: "Transfer reference", placeholder: "Bank reference, transaction hash…" }}
+                        confirmLabel="Mark settled"
                       />
-                      {p.status === "REQUESTED" && <button name="status" value="UNDER_REVIEW" className={button}>Review</button>}
-                      <button name="status" value="SETTLED" className={`${button} text-emerald-300`}>Mark settled</button>
-                      <button name="status" value="FAILED" className={`${button} text-rose-300`}>Fail (refund)</button>
-                    </form>
+                      <ConfirmDialog
+                        action={updatePayout}
+                        fields={{ id: p.id, status: "FAILED" }}
+                        trigger={{ label: "Fail (refund)", tone: "danger" }}
+                        title={`Fail the payout of @${p.creatorUsername}`}
+                        description={<>{money(p.amountCents)} goes back to the creator&apos;s available balance; they can request it again. The reason is shown to them.</>}
+                        reason={{ label: "Reason", placeholder: "Account details rejected by the bank…" }}
+                        confirmLabel="Fail the payout"
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}

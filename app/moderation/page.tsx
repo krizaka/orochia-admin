@@ -1,6 +1,7 @@
 import { orochia, day } from "@/lib/orochia";
 import { moderateVideo, updateReport } from "@/app/actions";
 import { Empty, PageTitle, Panel, button, td, th } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface Report {
   id: string;
@@ -76,24 +77,37 @@ export default async function ModerationPage(props: { searchParams: Promise<{ st
                   <td className={`${td} max-w-sm whitespace-pre-line`}>{r.details}</td>
                   <td className={`${td} font-mono`}>{r.reporterEmail}</td>
                   <td className={td}>
-                    <form action={updateReport} className="flex gap-1.5">
-                      <input type="hidden" name="id" value={r.id} />
+                    <div className="flex flex-wrap gap-1.5">
                       {r.status !== "IN_REVIEW" && r.status !== "RESOLVED" && (
-                        <button name="status" value="IN_REVIEW" className={button}>Start review</button>
+                        <ConfirmDialog direct action={updateReport} fields={{ id: r.id, status: "IN_REVIEW" }} trigger={{ label: "Start review" }} />
                       )}
                       {r.status !== "RESOLVED" && (
-                        <button name="status" value="RESOLVED" className={button}>Resolve</button>
+                        <ConfirmDialog
+                          action={updateReport}
+                          fields={{ id: r.id, status: "RESOLVED" }}
+                          trigger={{ label: "Resolve", tone: "primary" }}
+                          tone="primary"
+                          title="Resolve the report"
+                          description={<>The report leaves the queue. Take the video down first if the report is founded — resolving does not touch the video.</>}
+                          confirmLabel="Resolve"
+                        />
                       )}
                       {r.status === "RESOLVED" && (
-                        <button name="status" value="OPEN" className={button}>Reopen</button>
+                        <ConfirmDialog direct action={updateReport} fields={{ id: r.id, status: "OPEN" }} trigger={{ label: "Reopen" }} />
                       )}
-                    </form>
+                    </div>
                     {r.videoId && r.status !== "RESOLVED" && (
-                      <form action={moderateVideo} className="mt-1.5">
-                        <input type="hidden" name="id" value={r.videoId} />
-                        <input type="hidden" name="reason" value={`Report: ${REASON[r.reason] ?? r.reason}`} />
-                        <button name="action" value="remove" className={`${button} border-rose-500/40 hover:bg-rose-600`}>Take the video down</button>
-                      </form>
+                      <div className="mt-1.5">
+                        <ConfirmDialog
+                          action={moderateVideo}
+                          fields={{ id: r.videoId, action: "remove" }}
+                          trigger={{ label: "Take the video down", tone: "danger" }}
+                          title="Take the video down"
+                          description={<>“{r.videoTitle}” disappears everywhere — feed, search, profile, collections — and its playback is refused, for its author too. Its open auction is cancelled and the bid released. It can be restored from the catalogue.</>}
+                          reason={{ label: "Reason (recorded)", placeholder: `Report: ${REASON[r.reason] ?? r.reason}` }}
+                          confirmLabel="Take down"
+                        />
+                      </div>
                     )}
                   </td>
                 </tr>

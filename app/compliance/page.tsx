@@ -1,6 +1,7 @@
 import { orochia, day } from "@/lib/orochia";
 import { setCreatorVerified } from "@/app/actions";
-import { Empty, PageTitle, Panel, button, td, th } from "@/components/ui";
+import { Empty, PageTitle, Panel, td, th } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface Creator {
   id: string;
@@ -46,12 +47,15 @@ export default async function CompliancePage() {
                   </td>
                   <td className={`${td} font-mono`}>{c.email}</td>
                   <td className={td}>
-                    <form action={setCreatorVerified}>
-                      <input type="hidden" name="id" value={c.id} />
-                      <button name="isVerified" value="true" className={`${button} border-emerald-500/40 text-emerald-300`}>
-                        Records verified — approve
-                      </button>
-                    </form>
+                    <ConfirmDialog
+                      action={setCreatorVerified}
+                      fields={{ id: c.id, isVerified: "true" }}
+                      trigger={{ label: "Records verified — approve", tone: "primary" }}
+                      tone="primary"
+                      title={`Approve @${c.username}`}
+                      description={<>Confirm that the identity document, the age and the consent records match (18 U.S.C. § 2257). The creator can upload from now on; the decision is logged.</>}
+                      confirmLabel="Approve the creator"
+                    />
                   </td>
                 </tr>
               ))}
