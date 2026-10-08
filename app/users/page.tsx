@@ -1,6 +1,7 @@
 import { orochia, day } from "@/lib/orochia";
 import { manageUser } from "@/app/actions";
 import { Empty, PageTitle, Panel, button, td, th } from "@/components/ui";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface Account {
   id: string;
@@ -73,16 +74,17 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                     <p className="font-mono text-[10px] text-zinc-500">@{u.username} · {u.email}</p>
                   </td>
                   <td className={td}>
-                    <form action={manageUser} className="flex gap-1.5">
-                      <input type="hidden" name="id" value={u.id} />
-                      <input type="hidden" name="action" value="set-role" />
-                      <select name="role" defaultValue={u.role} className="rounded-lg border border-white/10 bg-zinc-900 px-2 py-1 text-[11px] text-white">
-                        <option value="MEMBER">Member</option>
-                        <option value="CREATOR">Creator</option>
-                        <option value="ADMIN">Admin</option>
-                      </select>
-                      <button className={button}>Set</button>
-                    </form>
+                    <span className="mr-2 font-semibold text-zinc-200">{u.role.toLowerCase()}</span>
+                    <ConfirmDialog
+                      action={manageUser}
+                      fields={{ id: u.id, action: "set-role" }}
+                      trigger={{ label: "Change" }}
+                      tone="primary"
+                      title={`Change the role of @${u.username}`}
+                      description={<>An administrator reaches this console and every operator action; a creator can publish once 2257-verified. The change applies on their next request.</>}
+                      choice={{ name: "role", label: "New role", defaultValue: u.role, options: [{ value: "MEMBER", label: "Member" }, { value: "CREATOR", label: "Creator" }, { value: "ADMIN", label: "Administrator" }] }}
+                      confirmLabel="Change the role"
+                    />
                   </td>
                   <td className={`${td} text-[11px]`}>
                     <span className={u.isAgeVerified ? "text-emerald-400" : "text-zinc-500"}>18+</span>
@@ -93,17 +95,27 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                     {u.suspendedAt ? <span className="text-rose-300">suspended — {u.suspensionReason}</span> : <span className="text-emerald-400">active</span>}
                   </td>
                   <td className={td}>
-                    <form action={manageUser} className="flex gap-1.5">
-                      <input type="hidden" name="id" value={u.id} />
-                      {u.suspendedAt ? (
-                        <button name="action" value="reinstate" className={button}>Reinstate</button>
-                      ) : (
-                        <>
-                          <input name="reason" required minLength={3} placeholder="Reason" className="w-32 rounded-lg border border-white/10 bg-zinc-900 px-2 py-1 text-[11px] text-white" />
-                          <button name="action" value="suspend" className={`${button} border-rose-500/40 hover:bg-rose-600`}>Suspend</button>
-                        </>
-                      )}
-                    </form>
+                    {u.suspendedAt ? (
+                      <ConfirmDialog
+                        action={manageUser}
+                        fields={{ id: u.id, action: "reinstate" }}
+                        trigger={{ label: "Reinstate", tone: "primary" }}
+                        tone="primary"
+                        title={`Reinstate @${u.username}`}
+                        description={<>The account can sign in again and its listed videos come back. Auctions cancelled by the suspension stay cancelled.</>}
+                        confirmLabel="Reinstate"
+                      />
+                    ) : (
+                      <ConfirmDialog
+                        action={manageUser}
+                        fields={{ id: u.id, action: "suspend" }}
+                        trigger={{ label: "Suspend", tone: "danger" }}
+                        title={`Suspend @${u.username}`}
+                        description={<>They are signed out on their next request and can no longer sign in; their videos are no longer listed and their open auctions are cancelled, with every leading bid released.</>}
+                        reason={{ label: "Reason (recorded and shown to the account)", placeholder: "Terms violation: …" }}
+                        confirmLabel="Suspend the account"
+                      />
+                    )}
                   </td>
                 </tr>
               ))}
