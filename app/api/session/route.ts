@@ -1,55 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ADMIN_COOKIE, apiBaseUrl } from "@/lib/orochia";
+import { cookies } from "next/headers";
+import { ADMIN_COOKIE, audit, sessionCookie, signIn, signOut } from "@/lib/account";
 
 export const dynamic = "force-dynamic";
 
-const SESSION_SECONDS = 8 * 60 * 60;
+const attempts = new Map<string, { count: number; resetAt: number }>();
 
-/**
- * Operator sign-in: the credentials are checked by Orochia, and the session it returns is kept
- * only if the account is an administrator. Members and creators are refused here.
- */
+/** Operator sign-in: the console's single account (ADMIN_EMAIL / ADMIN_PASSWORD). Ten attempts per 15 minutes and IP. */
 export async function POST(req: NextRequest) {
-  const { identifier, password } = (await req.json().catch(() => ({}))) as { identifier?: string; password?: string };
-  if (!identifier || !password) {
-    return NextResponse.json({ error: "Identifier and password are required" }, { status: 400 });
-  }
+  const ip = req.headers.get("do-connecting-ip")?.trim() || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+  const now = Date.now();
+  const entry = attempts.get(ip);
+  const window = entry && entry.resetAt > now ? entry : { count: 0, resetAt: now + 15 * 60_000 };
+  window.count += 1;
+  attempts.set(ip, window);
+  if (window.count > 10) return NextResponse.json({ error: "Too many attempts. Try again in a few minutes." }, { status: 429 });
 
-  const login = await fetch(`${apiBaseUrl()}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ identifier, password }),
-    cache: "no-store",
-  });
-  if (!login.ok) {
-    const status = login.status === 429 ? 429 : 401;
-    return NextResponse.json({ error: status === 429 ? "Too many attempts" : "Invalid credentials" }, { status });
+  const { email, password } = (await req.json().catch(() => ({}))) as { email?: string; password?: string };
+  if (!email || !password) return NextResponse.json({ error: "E-mail and password are required" }, { status: 400 });
+  try {
+    const token = await signIn(email, password);
+    if (!token) {
+      await audit("sign-in", email.slice(0, 200), false, ip);
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+    await audit("sign-in", null, true, ip);
+    const response = NextResponse.json({ success: true });
+    response.cookies.set(sessionCookie(token));
+    return response;
+  } catch (error) {
+    console.error("[admin] sign-in failed", error);
+    return NextResponse.json({ error: "The console is not configured (database or ADMIN_* variables)" }, { status: 503 });
   }
-  const token = (login.headers.get("set-cookie") ?? "").match(/orochia_session=([^;]+)/)?.[1];
-  if (!token) return NextResponse.json({ error: "Sign-in failed" }, { status: 502 });
-
-  const me = await fetch(`${apiBaseUrl()}/api/auth/me`, {
-    headers: { Cookie: `orochia_session=${token}` },
-    cache: "no-store",
-  });
-  const body = (await me.json().catch(() => ({ user: null }))) as { user: { role: string } | null };
-  if (body.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "This console is restricted to administrators" }, { status: 403 });
-  }
-
-  const response = NextResponse.json({ success: true });
-  response.cookies.set(ADMIN_COOKIE, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    path: "/",
-    maxAge: SESSION_SECONDS,
-  });
-  return response;
 }
 
-/** Sign-out. */
+/** Sign-out: the session is deleted on the server, not only forgotten by the browser. */
 export async function DELETE() {
+  await signOut((await cookies()).get(ADMIN_COOKIE)?.value).catch(() => undefined);
   const response = NextResponse.json({ success: true });
   response.cookies.set(ADMIN_COOKIE, "", { httpOnly: true, path: "/", maxAge: 0 });
   return response;

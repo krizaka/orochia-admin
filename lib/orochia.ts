@@ -1,19 +1,23 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { currentAdmin } from "./account";
 
 /**
- * Server-side client of the Orochia API. The admin console has no database of its own: every
- * figure and every action goes through Orochia's /api/admin endpoints, authorised by the ADMIN
- * session the operator signed in with (kept in an httpOnly cookie, never exposed to the browser).
+ * Server-side client of the Orochia admin API. The console signs its own operator in (lib/account.ts) and calls
+ * Orochia as a service: `Authorization: Bearer OROCHIA_ADMIN_API_TOKEN`, the token Orochia accepts on its ADMIN routes
+ * only (it acts there as the platform owner). The token never reaches the browser.
  */
-
-export const ADMIN_COOKIE = "orochia_admin_session";
 
 export function apiBaseUrl(): string {
   const url = process.env.OROCHIA_API_URL;
   if (url && url.trim()) return url.trim().replace(/\/$/, "");
   if (process.env.NODE_ENV === "production") throw new Error("OROCHIA_API_URL is required in production");
   return "http://localhost:3000";
+}
+
+export function serviceToken(): string {
+  const token = process.env.OROCHIA_ADMIN_API_TOKEN?.trim();
+  if (!token || token.length < 32) throw new Error("OROCHIA_ADMIN_API_TOKEN (32+ characters, shared with Orochia) is required");
+  return token;
 }
 
 export class ApiError extends Error {
@@ -25,46 +29,25 @@ export class ApiError extends Error {
   }
 }
 
-/** Calls Orochia with the operator's session; an expired or non-admin session goes back to /login. */
+/** Calls Orochia for the signed-in operator; without an operator session, back to /login. */
 export async function orochia<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = (await cookies()).get(ADMIN_COOKIE)?.value;
-  if (!token) redirect("/login");
+  if (!(await currentAdmin())) redirect("/login?expired=1");
   const res = await fetch(`${apiBaseUrl()}${path}`, {
     ...init,
     cache: "no-store",
     headers: {
       ...(init.body ? { "Content-Type": "application/json" } : {}),
       ...init.headers,
-      Cookie: `orochia_session=${token}`,
+      Authorization: `Bearer ${serviceToken()}`,
     },
   });
-  if (res.status === 401 || res.status === 403) redirect("/login?expired=1");
   const body = (await res.json().catch(() => ({}))) as T & { error?: string };
+  if (res.status === 401 || res.status === 503) throw new ApiError(res.status, `Orochia refused the console (${body.error ?? res.status}): check OROCHIA_ADMIN_API_TOKEN and OROCHIA_OWNER_EMAIL on both deployments`);
   if (!res.ok) throw new ApiError(res.status, body.error ?? `Orochia API error ${res.status}`);
   return body;
 }
 
-export interface AdminIdentity {
-  username: string;
-  email: string;
-  displayName: string;
-}
-
-/** The signed-in operator, or null (no cookie / session no longer valid / not an admin). */
-export async function currentAdmin(): Promise<AdminIdentity | null> {
-  const token = (await cookies()).get(ADMIN_COOKIE)?.value;
-  if (!token) return null;
-  try {
-    const res = await fetch(`${apiBaseUrl()}/api/auth/me`, {
-      cache: "no-store",
-      headers: { Cookie: `orochia_session=${token}` },
-    });
-    const body = (await res.json()) as { user: (AdminIdentity & { role: string }) | null };
-    return body.user && body.user.role === "ADMIN" ? body.user : null;
-  } catch {
-    return null;
-  }
-}
+export type { AdminIdentity } from "./account";
 
 export const money = (cents: number) =>
   `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
