@@ -51,7 +51,7 @@ npm run dev                     # :3001 — Orochia must be running (npm run set
 
 Sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Locally, create the database once
 (`docker exec orochia-postgres-dev psql -U orochia_user -d orochia_db -c "CREATE DATABASE orochia_admin"`); the
-tables are created on first use. Deployment: `Dockerfile` and `deploy/app-spec.dev.yaml` (App Platform, project
+tables are created on first use. Deployment: `deploy/Dockerfile` and `deploy/app-spec.dev.yaml` (App Platform, project
 `orochia`, its own dev database).
 
 ## 4. Definition of done

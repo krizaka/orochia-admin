@@ -7,7 +7,7 @@
 
 **Creators get paid. Every cent, exactly once.**
 
-The operator console of Orochia: 18 U.S.C. § 2257 creator verification, content-report triage, treasury and payouts — a server-side BFF over the Orochia admin API.
+The operator console of Orochia: 18 U.S.C. § 2257 creator verification, content-report triage, catalogue, auctions, treasury and payouts, backups — a server-side BFF over the Orochia admin API, with one operator account and its own database.
 
 [![CI](https://github.com/krizaka/orochia-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/krizaka/orochia-admin/actions/workflows/ci.yml)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -32,29 +32,34 @@ The operator console of Orochia: 18 U.S.C. § 2257 creator verification, content
 | Catalogue | `GET /api/bunny/analytics` | Videos by encoding state, total views |
 | Creator Registry | `GET/PATCH /api/admin/creators` | All creators, activity, suspend/restore uploads |
 
+| Auctions | `GET/DELETE /api/admin/auctions` | Open, awaiting and sold auctions, credits held; cancel with a reason |
+| Platform & Database | `/api/admin/platform*` + the console's own log | Migration history, rows per table, backups, factory reset (development), operator log |
+
 ```mermaid
 flowchart LR
-    Operator -->|sign-in, ADMIN only| Console[orochia-admin :3001]
-    Console -->|server-side, operator session| API[Orochia /api/admin/*]
-    API --> DB[(PostgreSQL)]
+    Operator -->|allowed IP only, one account| Console[orochia-admin :3001]
+    Console --> Own[(its own PostgreSQL: account, sessions, operator log)]
+    Console -->|server-side, Bearer service token| API[Orochia /api/admin/*]
+    API --> DB[(Orochia PostgreSQL)]
 ```
 
 ## Run locally
 
 ```bash
-cp .env.example .env.local      # OROCHIA_API_URL=http://localhost:3000
+cp .env.example .env.local      # its database, the operator account, the token shared with Orochia
 npm install
-npm run dev                     # http://localhost:3001 — sign in with an Orochia ADMIN account
+npm run dev                     # http://localhost:3001 — sign in with ADMIN_EMAIL / ADMIN_PASSWORD
 ```
 
-Start [Orochia](https://github.com/krizaka/orochia) first (`npm run dev` there; the seed creates an
-administrator for local use).
+Start [Orochia](https://github.com/krizaka/orochia) first, with the same `OROCHIA_ADMIN_API_TOKEN` in its `.env`.
+Create the console's database once:
+`docker exec orochia-postgres-dev psql -U orochia_user -d orochia_db -c "CREATE DATABASE orochia_admin"`.
 
 ## Deploy
 
-`deploy/Dockerfile` builds a standalone image (port 3001). Set `OROCHIA_API_URL` (internal URL of the
-Orochia web service) and `NEXT_PUBLIC_OROCHIA_APP_URL`. Expose the console only on a private network or
-behind an IP allow-list.
+`deploy/Dockerfile` builds a standalone image (port 3001); `deploy/app-spec.dev.yaml` creates the App Platform app in
+the `orochia` project with its own dev database. Secrets (`ADMIN_PASSWORD`, `OROCHIA_ADMIN_API_TOKEN`) are app
+variables, never in git. `ADMIN_ALLOWED_IPS` lists the only addresses that reach the console.
 
 ## License
 
