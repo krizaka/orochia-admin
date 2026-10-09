@@ -1,36 +1,65 @@
+import { buttonVariants } from "@krizaka/ui/button";
+import { Card } from "@krizaka/ui/card";
+import { cn } from "@krizaka/ui/cn";
+import { EmptyState } from "@krizaka/ui/empty-state";
+import { PageHeader } from "@krizaka/ui/page-header";
+import { Stat as KzStat } from "@krizaka/ui/stat";
 import React from "react";
-import { buttonClass } from "@krizaka/orochia-design-system/classes";
 
-export function PageTitle({ title, subtitle }: { title: string; subtitle: string }) {
+/** The console's page heading: the platform's PageHeader, with the room the screens expect below it. */
+export function PageTitle({ title, subtitle, actions }: { title: string; subtitle: string; actions?: React.ReactNode }) {
+  return <PageHeader title={title} description={subtitle} actions={actions} className="mb-8" />;
+}
+
+/** The status a figure carries (a status token: readable on both themes at this size). */
+export type Tone = "default" | "success" | "warning" | "danger" | "accent";
+export const toneText: Record<Tone, string> = {
+  default: "",
+  success: "text-success",
+  warning: "text-warning",
+  danger: "text-danger",
+  accent: "text-accent",
+};
+
+/** A figure in a card: the platform's Stat inside an elevated Card. */
+export function Stat({ label, value, hint, tone = "default" }: { label: string; value: React.ReactNode; hint?: string; tone?: Tone }) {
   return (
-    <div className="mb-8">
-      <h1 className="text-2xl font-bold text-white">{title}</h1>
-      <p className="text-xs text-zinc-400 mt-1">{subtitle}</p>
-    </div>
+    <Card.Root tone="elevated">
+      <Card.Body padding="md">
+        <KzStat label={label} value={<span className={cn("font-mono", toneText[tone])}>{value}</span>} hint={hint} />
+      </Card.Body>
+    </Card.Root>
   );
 }
 
-export function Stat({ label, value, hint, tone = "text-white" }: { label: string; value: React.ReactNode; hint?: string; tone?: string }) {
+/** Nothing to show: the platform's EmptyState (never sample data). */
+export function Empty({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
+  return <EmptyState title={children} icon={icon} />;
+}
+
+/** A table or a section: an elevated Card, large padding, scrolling sideways when the table is wider. */
+export function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-zinc-900/60 p-5">
-      <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">{label}</span>
-      <p className={`mt-2 text-2xl font-black font-mono ${tone}`}>{value}</p>
-      {hint && <span className="text-[11px] text-zinc-500">{hint}</span>}
-    </div>
+    <Card.Root tone="elevated" radius="xl">
+      <Card.Body padding="lg" className={cn("overflow-x-auto", className)}>
+        {children}
+      </Card.Body>
+    </Card.Root>
   );
 }
 
-export function Empty({ children }: { children: React.ReactNode }) {
-  return (
-    <p className="rounded-2xl border border-white/10 bg-zinc-900/40 p-10 text-center text-xs text-zinc-400">{children}</p>
-  );
-}
+export const th = "py-2 pr-4 text-left text-[10px] uppercase tracking-wider text-fg-muted font-semibold";
+export const td = "py-2.5 pr-4 text-xs text-fg-secondary align-top";
+/** Table bodies: a subtle rule between rows. */
+export const tbody = "divide-y divide-border-subtle";
+/** Strong text in a cell (a name, an amount). */
+export const strong = "font-semibold text-fg";
+/** Links to the consumer app. */
+export const link = "text-accent hover:underline";
+/** Table and form actions: the platform's secondary button, small. */
+export const button = buttonVariants({ variant: "secondary", size: "sm" });
+/** A filter link: a small button, highlighted when it is the current one (aria-current). */
+export const filter = (active: boolean) =>
+  buttonVariants({ variant: active ? "primary" : "secondary", size: "sm", className: active ? undefined : "text-fg-secondary" });
 
-export function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-3xl border border-white/10 bg-zinc-900/40 p-6 overflow-x-auto">{children}</div>;
-}
-
-export const th = "py-2 pr-4 text-left text-[10px] uppercase tracking-wider text-zinc-500 font-semibold";
-export const td = "py-2.5 pr-4 text-xs text-zinc-300 align-top";
-/** Table and form actions: the kit's secondary button, small. */
-export const button = buttonClass({ variant: "secondary", size: "sm" });
+export { cn };

@@ -29,7 +29,7 @@
 - Mutations are **server actions** (`app/actions.ts`) that call the API, then `revalidatePath` the screens they change.
 - Every operator decision that removes something records its **reason** (takedown, suspension, failed payout,
   cancelled auction).
-- **Every decision is confirmed in a dialog** (`components/ConfirmDialog.tsx`, the kit's `Sheet`): it says what will
+- **Every decision is confirmed in a dialog** (`components/ConfirmDialog.tsx`, the platform's `AlertDialog` and `Field`): it says what will
   happen, collects the reason or reference, shows the API's refusal in place. What cannot be undone asks the operator to
   type a phrase (the factory reset: `reset <database>`), and offers a backup first. Only benign, reversible steps
   (start review, reopen) run in one click (`direct`).
@@ -37,9 +37,16 @@
   `OROCHIA_ALLOW_DATABASE_RESET=true` and is not the indexed production. Backups are gzipped JSON in Orochia's private
   storage, downloaded through this console's `/api/backups/[name]` (the session never reaches the browser).
 - Pages render empty states, never sample data. Links to the consumer app use `NEXT_PUBLIC_OROCHIA_APP_URL`.
-- UI comes from [`@krizaka/orochia-design-system`](https://github.com/krizaka/orochia-design-system) on npm (the
-  `OrochiaLogo`, `buttonClass` for actions, the Tailwind CSS v4 `theme.css`); never a copy. A missing component is
-  added to the design system first. Tailwind CSS v4 is configured in `app/globals.css` (no `tailwind.config.js`).
+- UI comes from the platform primitives [`@krizaka/ui`](https://github.com/krizaka/krizaka-ui) (`Button`/`buttonVariants`,
+  `Card`, `Stat`, `PageHeader`, `EmptyState`, `AlertDialog`, `Field`, `Badge`, theme) and the Orochia identity
+  [`@krizaka/orochia-design-system`](https://github.com/krizaka/orochia-design-system) (`OrochiaLogo`, `theme.css`), on
+  npm; never a copy. `components/ui.tsx` only wraps them with the console's words. A missing component is added to the
+  platform first. Tailwind CSS v4 is configured in `app/globals.css` (no `tailwind.config.js`), in this order:
+  `tailwindcss` → `@krizaka/tailwind` → `@krizaka/ui/tailwind.css` → `@krizaka/orochia-design-system/theme.css`.
+- **Dark and light** are both first-class (`ThemeScript` + `ThemeProvider`, the toggle in the header). Components use
+  role utilities only (`bg-surface-*`, `text-fg*`, `border-border-*`, `text-accent`, `text-success|warning|danger`):
+  `npm run lint` refuses raw palette colours, `light:`, `[var(--…)]` and template strings in `className`
+  (`@krizaka/config`, as errors), and `krizaka-ratchet` keeps `lint-ratchet.json` at zero.
 
 ## 3. Run
 
@@ -60,3 +67,13 @@ tables are created on first use. Deployment: `deploy/Dockerfile` and `deploy/app
 2. The screen works against a seeded Orochia (`npm run db:reset -- --yes` there) with an admin session, and a
    member session is refused.
 3. Any new admin endpoint it relies on is documented and tested in the Orochia repository.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

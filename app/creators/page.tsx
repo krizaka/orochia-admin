@@ -1,7 +1,7 @@
-import { orochia, day, money } from "@/lib/orochia";
 import { setCreatorVerified } from "@/app/actions";
-import { Empty, PageTitle, Panel, td, th } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { cn, Empty, PageTitle, Panel, td, th } from "@/components/ui";
+import { day, money,orochia } from "@/lib/orochia";
 
 interface Creator {
   id: string;
@@ -34,17 +34,17 @@ export default async function CreatorsPage() {
                 <th className={th}>Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border-subtle">
               {creators.map((c) => (
                 <tr key={c.id}>
                   <td className={td}>
-                    <span className="font-semibold text-white">{c.displayName}</span>
-                    <span className="block text-zinc-500 font-mono">@{c.username} · {c.email}</span>
+                    <span className="font-semibold text-fg">{c.displayName}</span>
+                    <span className="block text-fg-muted font-mono">@{c.username} · {c.email}</span>
                   </td>
-                  <td className={`${td} font-mono`}>{day(c.createdAt)}</td>
-                  <td className={`${td} font-mono`}>{c.videosCount}</td>
-                  <td className={`${td} font-mono`}>{money(c.totalTipsEarnedCents)}</td>
-                  <td className={td}>{c.isVerified ? <span className="text-emerald-400">verified</span> : <span className="text-amber-300">pending</span>}</td>
+                  <td className={cn(td, "font-mono")}>{day(c.createdAt)}</td>
+                  <td className={cn(td, "font-mono")}>{c.videosCount}</td>
+                  <td className={cn(td, "font-mono")}>{money(c.totalTipsEarnedCents)}</td>
+                  <td className={td}>{c.isVerified ? <span className="text-success">verified</span> : <span className="text-warning">pending</span>}</td>
                   <td className={td}>
                     {c.isVerified ? (
                       <ConfirmDialog

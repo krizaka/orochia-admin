@@ -5,9 +5,9 @@
     "src/**/*.tsx"
   ],
   "counters": {
-    "palette": 147,
+    "palette": 0,
     "light": 0,
     "arbitraryVar": 0,
-    "classNameTemplate": 44
+    "classNameTemplate": 0
   }
 }

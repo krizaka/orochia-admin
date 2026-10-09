@@ -1,7 +1,7 @@
-import { orochia, day } from "@/lib/orochia";
 import { setCreatorVerified } from "@/app/actions";
-import { Empty, PageTitle, Panel, td, th } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { cn, Empty, PageTitle, Panel, td, th } from "@/components/ui";
+import { day,orochia } from "@/lib/orochia";
 
 interface Creator {
   id: string;
@@ -38,14 +38,14 @@ export default async function CompliancePage() {
                 <th className={th}>Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border-subtle">
               {creators.map((c) => (
                 <tr key={c.id}>
-                  <td className={`${td} font-mono`}>{day(c.createdAt)}</td>
+                  <td className={cn(td, "font-mono")}>{day(c.createdAt)}</td>
                   <td className={td}>
-                    <span className="font-semibold text-white">{c.displayName}</span> <span className="text-zinc-500">@{c.username}</span>
+                    <span className="font-semibold text-fg">{c.displayName}</span> <span className="text-fg-muted">@{c.username}</span>
                   </td>
-                  <td className={`${td} font-mono`}>{c.email}</td>
+                  <td className={cn(td, "font-mono")}>{c.email}</td>
                   <td className={td}>
                     <ConfirmDialog
                       action={setCreatorVerified}

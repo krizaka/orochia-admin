@@ -1,7 +1,7 @@
-import { orochia, day } from "@/lib/orochia";
 import { moderateVideo, updateReport } from "@/app/actions";
-import { Empty, PageTitle, Panel, button, td, th } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { cn, Empty, filter, PageTitle, Panel, td, th } from "@/components/ui";
+import { day,orochia } from "@/lib/orochia";
 
 interface Report {
   id: string;
@@ -31,7 +31,7 @@ export default async function ModerationPage(props: { searchParams: Promise<{ st
       <PageTitle title="Content Reports" subtitle="Suspected minors and non-consensual content are listed first" />
       <div className="mb-4 flex gap-2 text-xs">
         {["OPEN", "IN_REVIEW", "RESOLVED", "all"].map((s) => (
-          <a key={s} href={`/moderation?status=${s}`} className={`${button} ${(status || "all") === s ? "bg-violet-600 border-violet-500" : ""}`}>
+          <a key={s} href={`/moderation?status=${s}`} aria-current={(status || "all") === s ? "page" : undefined} className={filter((status || "all") === s)}>
             {s.replace("_", " ").toLowerCase()}
           </a>
         ))}
@@ -51,19 +51,19 @@ export default async function ModerationPage(props: { searchParams: Promise<{ st
                 <th className={th}>Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border-subtle">
               {reports.map((r) => (
                 <tr key={r.id}>
-                  <td className={`${td} font-mono whitespace-nowrap`}>{day(r.createdAt)}</td>
+                  <td className={cn(td, "font-mono whitespace-nowrap")}>{day(r.createdAt)}</td>
                   <td className={td}>
-                    <span className={r.reason === "UNDERAGE" || r.reason === "NON_CONSENSUAL" ? "font-bold text-rose-300" : ""}>
+                    <span className={r.reason === "UNDERAGE" || r.reason === "NON_CONSENSUAL" ? "font-bold text-danger" : ""}>
                       {REASON[r.reason] ?? r.reason}
                     </span>
                   </td>
                   <td className={td}>
                     {r.videoId ? (
                       <a
-                        className="text-violet-400 hover:underline"
+                        className="text-accent hover:underline"
                         href={`${process.env.NEXT_PUBLIC_OROCHIA_APP_URL || "http://localhost:3000"}/watch/${r.videoId}`}
                         target="_blank"
                         rel="noreferrer"
@@ -74,8 +74,8 @@ export default async function ModerationPage(props: { searchParams: Promise<{ st
                       r.videoTitle
                     )}
                   </td>
-                  <td className={`${td} max-w-sm whitespace-pre-line`}>{r.details}</td>
-                  <td className={`${td} font-mono`}>{r.reporterEmail}</td>
+                  <td className={cn(td, "max-w-sm whitespace-pre-line")}>{r.details}</td>
+                  <td className={cn(td, "font-mono")}>{r.reporterEmail}</td>
                   <td className={td}>
                     <div className="flex flex-wrap gap-1.5">
                       {r.status !== "IN_REVIEW" && r.status !== "RESOLVED" && (
