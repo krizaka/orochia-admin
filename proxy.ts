@@ -7,6 +7,7 @@ const ADMIN_COOKIE = "orochia_admin_session";
  * 1. Network — when ADMIN_ALLOWED_IPS is set (comma-separated addresses), every other client gets 403, sign-in page
  *    included. The client address is DigitalOcean's `do-connecting-ip` (set by its edge, not by the client); locally,
  *    the first `x-forwarded-for` hop. In production the list is mandatory: without it the console answers 403 to all.
+ *    Only `/api/health` (liveness, no data) is outside it.
  * 2. Session — no operator cookie, back to /login (the session itself is checked against the console's database).
  */
 function clientIp(req: NextRequest): string | null {
@@ -20,6 +21,8 @@ function allowed(ip: string | null): boolean {
 }
 
 export function proxy(req: NextRequest) {
+  // The platform's health check comes from inside its network; the route answers "ok" and nothing else.
+  if (req.nextUrl.pathname === "/api/health") return NextResponse.next();
   if (!allowed(clientIp(req))) return new NextResponse("Forbidden", { status: 403 });
   const { pathname } = req.nextUrl;
   if (pathname.startsWith("/login") || pathname.startsWith("/api/session")) return NextResponse.next();
