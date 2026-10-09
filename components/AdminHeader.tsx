@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
-import type { AdminIdentity } from "@/lib/orochia";
+import type { AdminIdentity } from "@/lib/account";
 
 export function AdminHeader({ admin }: { admin: AdminIdentity }) {
   const router = useRouter();

@@ -7,10 +7,16 @@
 
 ## 1. What this repository is
 
-- A Next.js 16 **server-side BFF**: it has **no database and no secret of its own**. Every figure and every action
-  goes through Orochia's `/api/admin/*` endpoints with the operator's ADMIN session.
-- The session lives in the httpOnly `orochia_admin_session` cookie (`lib/orochia.ts`); it never reaches client code.
-  An expired, suspended or non-admin session is sent back to `/login`.
+- A Next.js 16 **server-side BFF** with **its own small database** (`DATABASE_URL`, `lib/db.ts`): the single operator
+  account, its sessions and the **operator log** of every decision and sign-in. Orochia's data is never read from
+  Orochia's database: every figure and every action goes through Orochia's `/api/admin/*` endpoints.
+- **One account, the default operator**, defined by environment (`ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD`,
+  `lib/account.ts`): written to the console's database, refreshed when the environment changes (a new password closes
+  every session). No sign-up, no second user. Sessions: random tokens stored hashed, httpOnly cookie, 8 hours.
+- The console calls Orochia as a **service**: `Authorization: Bearer OROCHIA_ADMIN_API_TOKEN` (same value on both
+  deployments). Orochia accepts it on ADMIN routes only and acts as its owner account. The token never reaches the browser.
+- **Network gate** (`proxy.ts`): only the addresses in `ADMIN_ALLOWED_IPS` reach the console, sign-in page included
+  (client address from App Platform's `do-connecting-ip`). In production an empty list lets nobody in.
 - Screens: overview · 2257 creator verification · content reports · catalogue (takedown / restore) · auctions
   (status, money held, cancel with a reason) · treasury & payouts · creator registry · accounts (suspend / reinstate /
   role) · platform & database (environment, migration history, rows per table, backups, factory reset).
@@ -39,11 +45,14 @@
 
 ```bash
 npm install
-OROCHIA_API_URL=http://localhost:3000 npm run dev -- -p 3001   # Orochia must be running (npm run setup && npm run dev)
+cp .env.example .env.local      # its own database, the operator account, the token shared with Orochia
+npm run dev                     # :3001 — Orochia must be running (npm run setup && npm run dev)
 ```
 
-Sign in with an administrator account (`admin@orochia.org` / `admin1234` in the development seed).
-`OROCHIA_API_URL` is mandatory in production.
+Sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Locally, create the database once
+(`docker exec orochia-postgres-dev psql -U orochia_user -d orochia_db -c "CREATE DATABASE orochia_admin"`); the
+tables are created on first use. Deployment: `deploy/Dockerfile` and `deploy/app-spec.dev.yaml` (App Platform, project
+`orochia`, its own dev database).
 
 ## 4. Definition of done
 

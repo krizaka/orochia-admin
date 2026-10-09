@@ -1,5 +1,6 @@
-import { Database, Download, HardDrive, RotateCcw, ShieldAlert, Trash2 } from "lucide-react";
+import { Database, Download, HardDrive, History, RotateCcw, ShieldAlert, Trash2 } from "lucide-react";
 import { orochia } from "@/lib/orochia";
+import { recentAudit } from "@/lib/account";
 import { backupDatabase, deleteBackup, factoryReset } from "@/app/actions";
 import { Empty, PageTitle, Panel, Stat, td, th } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -31,9 +32,10 @@ const HISTORY: Record<Platform["history"]["kind"], { label: string; tone: string
 
 /** The platform: environment, database, migrations, backups, and the factory reset of a development database. */
 export default async function PlatformPage() {
-  const [{ platform: p }, { backups }] = await Promise.all([
+  const [{ platform: p }, { backups }, log] = await Promise.all([
     orochia<{ platform: Platform }>("/api/admin/platform"),
     orochia<{ backups: Backup[] }>("/api/admin/platform/backups"),
+    recentAudit(30),
   ]);
   const rows = p.tables.reduce((sum, t) => sum + t.rows, 0);
   const history = HISTORY[p.history.kind];
@@ -85,21 +87,21 @@ export default async function PlatformPage() {
                 <tbody className="divide-y divide-white/5">
                   {backups.map((b) => (
                     <tr key={b.name}>
-                      <td className={`${td} whitespace-nowrap font-mono`}>{when(b.createdAt)}</td>
-                      <td className={`${td} max-w-[15rem] truncate font-mono text-[11px]`} title={b.name}>{b.name}</td>
-                      <td className={`${td} font-mono`}>{size(b.sizeBytes)}</td>
+                      <td className={`${td} whitespace-nowrap font-mono text-[11px]`}>{when(b.createdAt)}</td>
+                      <td className={`${td} max-w-[13rem] truncate font-mono text-[11px]`} title={b.name}>{b.name}</td>
+                      <td className={`${td} whitespace-nowrap font-mono`}>{size(b.sizeBytes)}</td>
                       <td className={td}>
                         <div className="flex gap-1.5">
                           <a
                             href={`/api/backups/${encodeURIComponent(b.name)}`}
                             className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-xs font-semibold text-zinc-200 transition-colors hover:border-white/25 hover:text-white"
                           >
-                            <Download className="h-3.5 w-3.5" aria-hidden /> Download
+                            <Download className="h-3.5 w-3.5" aria-hidden /> <span className="sr-only">Download </span>.gz
                           </a>
                           <ConfirmDialog
                             action={deleteBackup}
                             fields={{ name: b.name }}
-                            trigger={{ label: "Delete", tone: "danger", icon: <Trash2 className="h-3.5 w-3.5" aria-hidden /> }}
+                            trigger={{ label: "", tone: "danger", icon: <Trash2 className="h-3.5 w-3.5" aria-label="Delete" /> }}
                             title="Delete the backup"
                             description={<>The file <span className="font-mono">{b.name}</span> is removed from storage for good. Download it first if you may need it.</>}
                             confirmLabel="Delete"
@@ -132,6 +134,42 @@ export default async function PlatformPage() {
         </section>
       </div>
 
+      {/* Operator log (the console's own database) */}
+      <section aria-labelledby="log-title" className="mt-10">
+        <h2 id="log-title" className="mb-3 flex items-center gap-2 text-sm font-bold text-white">
+          <History className="h-4 w-4 text-violet-400" aria-hidden /> Operator log
+          <span className="text-[11px] font-normal text-zinc-500">— every decision and sign-in, kept in this console&apos;s database</span>
+        </h2>
+        {log.length === 0 ? (
+          <Empty>Nothing logged yet.</Empty>
+        ) : (
+          <Panel>
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className={th}>When</th>
+                  <th className={th}>Action</th>
+                  <th className={th}>Target</th>
+                  <th className={th}>Outcome</th>
+                  <th className={th}>Detail</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {log.map((e, i) => (
+                  <tr key={i}>
+                    <td className={`${td} whitespace-nowrap font-mono`}>{when(new Date(e.at).toISOString())}</td>
+                    <td className={`${td} font-semibold text-white`}>{e.action}</td>
+                    <td className={`${td} max-w-[12rem] truncate font-mono text-[11px]`} title={e.target ?? ""}>{e.target ?? "—"}</td>
+                    <td className={`${td} ${e.ok ? "text-emerald-400" : "text-rose-300"}`}>{e.ok ? "done" : "refused"}</td>
+                    <td className={`${td} max-w-md truncate`} title={e.detail ?? ""}>{e.detail ?? ""}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Panel>
+        )}
+      </section>
+
       {/* Danger zone */}
       <section aria-labelledby="danger-title" className="mt-10 rounded-3xl border border-rose-500/30 bg-rose-950/20 p-6">
         <h2 id="danger-title" className="flex items-center gap-2 text-sm font-bold text-rose-200">
@@ -142,7 +180,7 @@ export default async function PlatformPage() {
             <p className="text-sm font-semibold text-white">Factory reset</p>
             <p className="mt-1">
               Deletes every account, video, payment, auction and setting, then rebuilds the database from this release&apos;s migrations — the state of a fresh install.
-              Your administrator account is kept (same sign-in, your session goes on){p.reset.ownerConfigured ? " and the configured owner account is restored" : ""}.
+              Orochia&apos;s owner account is kept{p.reset.ownerConfigured ? " (as configured)" : ""}. This console, its account and its log live in their own database and are not affected.
               Media files at Bunny are not deleted.
             </p>
             {!p.reset.allowed && (

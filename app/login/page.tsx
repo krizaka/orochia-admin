@@ -7,7 +7,7 @@ import { OrochiaLogo } from "@krizaka/orochia-design-system";
 function LoginForm() {
   const router = useRouter();
   const expired = useSearchParams().get("expired");
-  const [identifier, setIdentifier] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(expired ? "Your session ended. Please sign in again." : null);
   const [busy, setBusy] = useState(false);
@@ -19,7 +19,7 @@ function LoginForm() {
     const res = await fetch("/api/session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ identifier, password }),
+      body: JSON.stringify({ email, password }),
     });
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     setBusy(false);
@@ -37,12 +37,13 @@ function LoginForm() {
         <div className="text-center">
           <OrochiaLogo size={72} className="mx-auto mb-2" />
           <h1 className="text-xl font-bold text-white">Orochia Control Plane</h1>
-          <p className="text-xs text-zinc-400 mt-1">Administrator accounts only</p>
+          <p className="text-xs text-zinc-400 mt-1">The operator account only</p>
         </div>
         <input
-          value={identifier}
-          onChange={(e) => setIdentifier(e.target.value)}
-          placeholder="E-mail or username"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="E-mail"
           autoComplete="username"
           required
           className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-violet-500 focus:outline-hidden"

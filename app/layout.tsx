@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { AdminHeader } from "@/components/AdminHeader";
-import { currentAdmin } from "@/lib/orochia";
+import { currentAdmin } from "@/lib/account";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
