@@ -1,9 +1,13 @@
 "use client";
 
-import React, { useActionState, useState } from "react";
-import { useFormStatus } from "react-dom";
+import { Button } from "@krizaka/ui/button";
+import { cn } from "@krizaka/ui/cn";
+import { AlertDialog } from "@krizaka/ui/dialog";
+import { Field, Input, Select, Textarea } from "@krizaka/ui/field";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
-import { Button, Sheet, cx } from "@krizaka/orochia-design-system";
+import React, { useActionState, useEffect, useId, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
+
 import type { ActionState } from "@/app/actions";
 
 type Tone = "danger" | "primary" | "secondary";
@@ -31,134 +35,195 @@ export interface ConfirmDialogProps {
   direct?: boolean;
 }
 
-const triggerClass: Record<Tone, string> = {
-  danger: "border-rose-500/40 text-rose-200 hover:border-rose-400 hover:bg-rose-600 hover:text-white",
-  primary: "border-violet-500/50 text-violet-100 hover:bg-violet-600 hover:text-white",
-  secondary: "",
-};
+/** The trigger, as the platform's small button: danger for what removes, outline for what grants, secondary otherwise. */
+const TRIGGER_VARIANT = { danger: "danger", primary: "outline", secondary: "secondary" } as const;
 
-const field =
-  "mt-1.5 w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:border-violet-500 focus:outline-hidden";
-
-function Submit({ label, tone, disabled }: { label: string; tone: Tone; disabled: boolean }) {
+/** The trigger of a direct action submits its form: its pending state comes from the form (useFormStatus). */
+function DirectSubmit({ trigger }: { trigger: ConfirmDialogProps["trigger"] }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" variant={tone === "danger" ? "danger" : tone === "primary" ? "primary" : "secondary"} loading={pending} disabled={disabled}>
-      {label}
+    <Button type="submit" size="sm" variant={TRIGGER_VARIANT[trigger.tone ?? "secondary"]} loading={pending} disabled={trigger.disabled}>
+      {trigger.icon}
+      {trigger.label}
     </Button>
   );
 }
 
+/** Inside the dialog's form: the fields are locked while the server action runs (useFormStatus). */
+function Fields({ children }: { children: React.ReactNode }) {
+  const { pending } = useFormStatus();
+  return (
+    <fieldset disabled={pending} className="space-y-4">
+      {children}
+    </fieldset>
+  );
+}
+
 /**
- * Every operator decision goes through here: a dialog that says what will happen, collects what the decision is
- * recorded with (a reason, a reference, a typed phrase for what cannot be undone), shows the API's refusal in place, and
- * closes on success. Escape, the backdrop and the close button cancel (the kit's Sheet).
+ * Every operator decision goes through here: the platform's AlertDialog says what will happen, its form (the Field
+ * primitives) collects what the decision is recorded with (a reason, a reference, a typed phrase for what cannot be
+ * undone), the API's refusal shows in place, a success closes it. Escape and Cancel close it, never while it runs.
+ *
+ * The confirm button submits the form (requestSubmit): the browser checks the fields first (required, minLength, the
+ * phrase's pattern), then the server action runs through useActionState and the dialog waits for its answer.
  */
 export function ConfirmDialog(props: ConfirmDialogProps) {
   const { action, fields = {}, trigger, title = "", description, confirmLabel = "Confirm", tone = "danger", reason, phrase, option, choice, direct } = props;
   const [state, formAction] = useActionState(action, null);
+  const [open, setOpen] = useState(false);
   // The result the dialog opened with: a newer one is this dialog's answer (a success closes it, an error shows in it).
-  const [opened, setOpened] = useState<{ base: ActionState } | null>(null);
+  const [base, setBase] = useState<ActionState>(null);
   const [typed, setTyped] = useState("");
-  const answered = opened !== null && state !== opened.base;
-  const open = opened !== null && !(answered && state?.ok);
-  const show = () => {
-    setTyped("");
-    setOpened({ base: state });
-  };
-  const close = () => setOpened(null);
+  const form = useRef<HTMLFormElement>(null);
+  const waiting = useRef<{ resolve: () => void; reject: (error: Error) => void } | null>(null);
+  const id = useId();
+
+  // The server action answered: settle the confirm button's promise (a refusal keeps the dialog open).
+  useEffect(() => {
+    const pending = waiting.current;
+    if (!pending) return;
+    waiting.current = null;
+    if (state?.ok) pending.resolve();
+    else pending.reject(new Error(state?.error ?? "Refused"));
+  }, [state]);
 
   const hidden = Object.entries(fields).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />);
+  const answered = open && state !== base;
   const feedback = state && (state.ok ? state.message : direct && state.error) && (
-    <span role="status" className={cx("text-[11px]", state.ok ? "text-emerald-300" : "text-rose-300")}>
+    <span role="status" className={cn("text-[11px]", state.ok ? "text-success" : "text-danger")}>
       {state.ok ? state.message : state.error}
     </span>
-  );
-  const triggerButton = (type: "button" | "submit") => (
-    <button
-      type={type}
-      disabled={trigger.disabled}
-      onClick={type === "button" ? show : undefined}
-      className={cx(
-        "inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 px-3 text-xs font-semibold text-zinc-200 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-violet-400 disabled:cursor-not-allowed disabled:opacity-40",
-        triggerClass[trigger.tone ?? "secondary"],
-      )}
-    >
-      {trigger.icon}
-      {trigger.label}
-    </button>
   );
 
   if (direct) {
     return (
       <form action={formAction} className="inline-flex items-center gap-2">
         {hidden}
-        {triggerButton("submit")}
+        <DirectSubmit trigger={trigger} />
         {feedback}
       </form>
     );
   }
 
-  const armed = !phrase || typed.trim() === phrase;
+  const onOpenChange = (next: boolean) => {
+    if (next) {
+      setTyped("");
+      setBase(state);
+    }
+    setOpen(next);
+  };
+
+  const confirm = () => {
+    const element = form.current;
+    if (!element || !element.reportValidity()) return Promise.reject(new Error("invalid"));
+    return new Promise<void>((resolve, reject) => {
+      waiting.current = { resolve, reject };
+      element.requestSubmit();
+    });
+  };
+
+  // Enter in a text field would submit the form behind the dialog's back: the confirm button is the only way in.
+  const submitsOnlyByConfirm = (event: React.KeyboardEvent<HTMLFormElement>) => {
+    if (event.key === "Enter" && event.target instanceof HTMLInputElement) event.preventDefault();
+  };
+
+  const escaped = phrase?.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return (
     <span className="inline-flex items-center gap-2">
-      {triggerButton("button")}
-      {feedback}
-      <Sheet
+      <AlertDialog
         open={open}
-        onClose={close}
+        onOpenChange={onOpenChange}
+        trigger={
+          <Button size="sm" variant={TRIGGER_VARIANT[trigger.tone ?? "secondary"]} disabled={trigger.disabled}>
+            {trigger.icon}
+            {trigger.label}
+          </Button>
+        }
         title={title}
-        closeLabel="Close"
+        tone={tone === "danger" ? "danger" : "primary"}
+        confirmLabel={confirmLabel}
+        cancelLabel="Go back"
+        onConfirm={confirm}
       >
-        <form action={formAction} className="space-y-4">
+        <form ref={form} action={formAction} onKeyDown={submitsOnlyByConfirm} className="space-y-4">
           {hidden}
-          <div className={cx("flex gap-3 rounded-2xl border p-4 text-sm leading-relaxed", tone === "danger" ? "border-rose-500/30 bg-rose-500/10 text-rose-100" : "border-white/10 bg-white/[0.03] text-zinc-300")}>
-            {tone === "danger" ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-300" aria-hidden /> : <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-violet-300" aria-hidden />}
+          <div
+            className={cn(
+              "flex gap-3 rounded-xl border p-4 text-sm leading-relaxed text-fg",
+              tone === "danger" ? "border-danger/40 bg-danger/10" : "border-border-default bg-surface-2",
+            )}
+          >
+            {tone === "danger" ? (
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden />
+            ) : (
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+            )}
             <div>{description}</div>
           </div>
-          {choice && (
-            <label className="block text-xs font-semibold text-zinc-400">
-              {choice.label}
-              <select name={choice.name} defaultValue={choice.defaultValue} className={field}>
-                {choice.options.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          {reason && (
-            <label className="block text-xs font-semibold text-zinc-400">
-              {reason.label}
-              <textarea name="reason" required minLength={reason.minLength ?? 3} maxLength={500} rows={3} placeholder={reason.placeholder} className={field} />
-              {reason.hint && <span className="mt-1 block text-[11px] font-normal text-zinc-500">{reason.hint}</span>}
-            </label>
-          )}
-          {option && (
-            <label className="flex items-start gap-3 rounded-2xl border border-white/10 p-4">
-              <input type="checkbox" name={option.name} defaultChecked={option.defaultChecked ?? true} className="mt-0.5 h-4 w-4 accent-violet-600" />
-              <span>
-                <span className="block text-sm font-semibold text-white">{option.label}</span>
-                {option.hint && <span className="mt-0.5 block text-[11px] text-zinc-500">{option.hint}</span>}
-              </span>
-            </label>
-          )}
-          {phrase && (
-            <label className="block text-xs font-semibold text-zinc-400">
-              Type <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-rose-200">{phrase}</code> to confirm
-              <input name="phrase" value={typed} onChange={(e) => setTyped(e.target.value)} autoComplete="off" spellCheck={false} className={cx(field, "font-mono")} />
-            </label>
-          )}
-          {answered && state && !state.ok && <p role="alert" className="text-xs text-rose-300">{state.error}</p>}
-          <div className="flex justify-end gap-2 border-t border-white/10 pt-4">
-            <Button type="button" variant="secondary" onClick={close}>
-              Go back
-            </Button>
-            <Submit label={confirmLabel} tone={tone} disabled={!armed} />
-          </div>
+          <Fields>
+            {choice && (
+              <Field.Root>
+                <Field.Label htmlFor={`${id}-choice`}>{choice.label}</Field.Label>
+                <Select id={`${id}-choice`} name={choice.name} defaultValue={choice.defaultValue}>
+                  {choice.options.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </Select>
+              </Field.Root>
+            )}
+            {reason && (
+              <Field.Root>
+                <Field.Label htmlFor={`${id}-reason`}>{reason.label}</Field.Label>
+                <Textarea
+                  id={`${id}-reason`}
+                  name="reason"
+                  required
+                  minLength={reason.minLength ?? 3}
+                  maxLength={500}
+                  rows={3}
+                  placeholder={reason.placeholder}
+                  aria-describedby={reason.hint ? `${id}-reason-hint` : undefined}
+                />
+                {reason.hint && <Field.Hint id={`${id}-reason-hint`}>{reason.hint}</Field.Hint>}
+              </Field.Root>
+            )}
+            {option && (
+              <label className="flex items-start gap-3 rounded-xl border border-border-default p-4">
+                <input type="checkbox" name={option.name} defaultChecked={option.defaultChecked ?? true} className="mt-0.5 h-4 w-4 accent-accent" />
+                <span>
+                  <span className="block text-sm font-semibold text-fg">{option.label}</span>
+                  {option.hint && <span className="mt-0.5 block text-[11px] text-fg-muted">{option.hint}</span>}
+                </span>
+              </label>
+            )}
+            {phrase && (
+              <Field.Root>
+                <Field.Label htmlFor={`${id}-phrase`}>
+                  Type <code className="rounded-sm bg-surface-3 px-1.5 py-0.5 font-mono text-fg">{phrase}</code> to confirm
+                </Field.Label>
+                <Input
+                  id={`${id}-phrase`}
+                  name="phrase"
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                  required
+                  pattern={`\\s*${escaped}\\s*`}
+                  title={`Type “${phrase}” to confirm`}
+                  autoComplete="off"
+                  spellCheck={false}
+                  data-armed={typed.trim() === phrase ? "" : undefined}
+                  className="font-mono data-armed:border-success"
+                />
+                <Field.Hint>{typed.trim() === phrase ? "Armed: the action can run." : "The action stays locked until the phrase matches."}</Field.Hint>
+              </Field.Root>
+            )}
+          </Fields>
+          {answered && state && !state.ok && <Field.Error>{state.error}</Field.Error>}
         </form>
-      </Sheet>
+      </AlertDialog>
+      {feedback}
     </span>
   );
 }

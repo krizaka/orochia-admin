@@ -7,11 +7,13 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "eslint ."
+    "lint": "eslint . && krizaka-ratchet"
   },
   "dependencies": {
-    "@krizaka/orochia-design-system": "^2.2.0",
-    "@krizaka/ui": "^1.0.0",
+    "@krizaka/orochia-design-system": "^3.0.0",
+    "@krizaka/tailwind": "^2.0.0-beta.1",
+    "@krizaka/tokens": "^2.0.0-beta.1",
+    "@krizaka/ui": "^2.0.0-beta.1",
     "lucide-react": "^1.52.0",
     "next": "^16.4.0",
     "pg": "^8.23.1",
@@ -19,6 +21,7 @@
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@krizaka/config": "^0.1.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.23.1",

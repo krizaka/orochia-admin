@@ -1,9 +1,16 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
+import { Badge } from "@krizaka/ui/badge";
+import { IconButton } from "@krizaka/ui/button";
+import { ThemeToggle } from "@krizaka/ui/theme";
 import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React from "react";
+
 import type { AdminIdentity } from "@/lib/account";
+
+/** The console has no i18n: English labels, fixed (one operator, desktop). */
+const THEME_LABEL = { dark: "Theme: dark — switch to light", "light": "Theme: light — follow the system", system: "Theme: system — switch to dark" };
 
 export function AdminHeader({ admin }: { admin: AdminIdentity }) {
   const router = useRouter();
@@ -15,25 +22,20 @@ export function AdminHeader({ admin }: { admin: AdminIdentity }) {
   const initials = admin.displayName.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
-    <header className="h-16 border-b border-white/10 bg-zinc-950/80 backdrop-blur-xl px-6 flex items-center justify-between sticky top-0 z-30">
-      <span className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
-        Administrator
-      </span>
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border-default bg-surface-1/80 px-6 backdrop-blur-xl">
+      <Badge tone="success">Administrator</Badge>
       <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-xl bg-linear-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-xs font-bold">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-tr from-accent to-accent-2 text-xs font-bold text-on-accent">
           {initials}
         </div>
-        <div className="hidden sm:block text-left">
-          <p className="text-xs font-bold text-white leading-none">{admin.displayName}</p>
-          <p className="text-[10px] font-mono text-violet-400 mt-0.5">{admin.email}</p>
+        <div className="hidden text-left sm:block">
+          <p className="text-xs font-bold leading-none text-fg">{admin.displayName}</p>
+          <p className="mt-0.5 font-mono text-[10px] text-accent">{admin.email}</p>
         </div>
-        <button
-          onClick={signOut}
-          className="ml-2 flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-zinc-900 text-zinc-400 hover:text-white hover:bg-zinc-800"
-          aria-label="Sign out"
-        >
+        <ThemeToggle label={(mode) => THEME_LABEL[mode]} variant="secondary" className="ml-2 h-9 w-9" />
+        <IconButton label="Sign out" variant="secondary" onClick={signOut} className="h-9 w-9">
           <LogOut className="h-4 w-4" />
-        </button>
+        </IconButton>
       </div>
     </header>
   );

@@ -1,7 +1,7 @@
-import { orochia, day } from "@/lib/orochia";
 import { manageUser } from "@/app/actions";
-import { Empty, PageTitle, Panel, button, td, th } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { button, cn, Empty, filter, PageTitle, Panel, td, th } from "@/components/ui";
+import { day,orochia } from "@/lib/orochia";
 
 interface Account {
   id: string;
@@ -41,13 +41,13 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
       />
       <form className="mb-4 flex flex-wrap gap-2 text-xs" action="/users">
         {FILTERS.map(([label, qs]) => (
-          <a key={label} href={`/users${qs ? `?${qs}` : ""}`} className={`${button} ${current === qs ? "bg-violet-600 border-violet-500" : ""}`}>
+          <a key={label} href={`/users${qs ? `?${qs}` : ""}`} aria-current={current === qs ? "page" : undefined} className={filter(current === qs)}>
             {label}
           </a>
         ))}
         {searchParams.role && <input type="hidden" name="role" value={searchParams.role} />}
         {searchParams.suspended && <input type="hidden" name="suspended" value={searchParams.suspended} />}
-        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Username or e-mail" className="ml-auto rounded-lg border border-white/10 bg-zinc-900 px-3 py-1 text-xs text-white" />
+        <input name="q" defaultValue={searchParams.q ?? ""} placeholder="Username or e-mail" className="ml-auto rounded-lg border border-border-default bg-surface-2 px-3 py-1 text-xs text-fg" />
         <button className={button}>Search</button>
       </form>
 
@@ -66,15 +66,15 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                 <th className={th}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border-subtle">
               {users.map((u) => (
                 <tr key={u.id}>
                   <td className={td}>
-                    <p className="font-semibold text-white">{u.displayName}</p>
-                    <p className="font-mono text-[10px] text-zinc-500">@{u.username} · {u.email}</p>
+                    <p className="font-semibold text-fg">{u.displayName}</p>
+                    <p className="font-mono text-[10px] text-fg-muted">@{u.username} · {u.email}</p>
                   </td>
                   <td className={td}>
-                    <span className="mr-2 font-semibold text-zinc-200">{u.role.toLowerCase()}</span>
+                    <span className="mr-2 font-semibold text-fg">{u.role.toLowerCase()}</span>
                     <ConfirmDialog
                       action={manageUser}
                       fields={{ id: u.id, action: "set-role" }}
@@ -86,13 +86,13 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                       confirmLabel="Change the role"
                     />
                   </td>
-                  <td className={`${td} text-[11px]`}>
-                    <span className={u.isAgeVerified ? "text-emerald-400" : "text-zinc-500"}>18+</span>
-                    {u.role === "CREATOR" && <span className={`ml-2 ${u.isVerified ? "text-emerald-400" : "text-amber-300"}`}>2257 {u.isVerified ? "✓" : "pending"}</span>}
+                  <td className={cn(td, "text-[11px]")}>
+                    <span className={u.isAgeVerified ? "text-success" : "text-fg-muted"}>18+</span>
+                    {u.role === "CREATOR" && <span className={cn("ml-2", u.isVerified ? "text-success" : "text-warning")}>2257 {u.isVerified ? "✓" : "pending"}</span>}
                   </td>
-                  <td className={`${td} font-mono whitespace-nowrap`}>{day(u.createdAt)}</td>
+                  <td className={cn(td, "font-mono whitespace-nowrap")}>{day(u.createdAt)}</td>
                   <td className={td}>
-                    {u.suspendedAt ? <span className="text-rose-300">suspended — {u.suspensionReason}</span> : <span className="text-emerald-400">active</span>}
+                    {u.suspendedAt ? <span className="text-danger">suspended — {u.suspensionReason}</span> : <span className="text-success">active</span>}
                   </td>
                   <td className={td}>
                     {u.suspendedAt ? (

@@ -1,7 +1,7 @@
-import { orochia, day, money } from "@/lib/orochia";
 import { updatePayout } from "@/app/actions";
-import { Empty, PageTitle, Panel, Stat, td, th } from "@/components/ui";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { cn, Empty, PageTitle, Panel, Stat, td, th } from "@/components/ui";
+import { day, money,orochia } from "@/lib/orochia";
 
 interface Treasury {
   protocolRakePercent: number;
@@ -38,13 +38,13 @@ export default async function TreasuryPage() {
       <PageTitle title="Treasury & Payouts" subtitle="Figures computed from the ledger; payouts are settled by an operator" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
         <Stat label="Gross volume" value={money(t.grossCents)} hint={`${t.creditsCount} payments`} />
-        <Stat label="Platform fees" value={money(t.platformFeeCents)} hint={`${t.protocolRakePercent}% of gross`} tone="text-emerald-400" />
+        <Stat label="Platform fees" value={money(t.platformFeeCents)} hint={`${t.protocolRakePercent}% of gross`} tone="success" />
         <Stat label="Creator earnings" value={money(t.creatorNetCents)} hint="net of fees" />
-        <Stat label="Payouts in progress" value={money(t.payoutsRequestedCents)} tone="text-amber-300" />
+        <Stat label="Payouts in progress" value={money(t.payoutsRequestedCents)} tone="warning" />
         <Stat label="Payouts settled" value={money(t.payoutsSettledCents)} />
       </div>
 
-      <h2 className="mb-3 text-sm font-bold text-white">Payouts to process ({open.length})</h2>
+      <h2 className="mb-3 text-sm font-bold text-fg">Payouts to process ({open.length})</h2>
       {open.length === 0 ? (
         <Empty>No payout waiting.</Empty>
       ) : (
@@ -60,13 +60,13 @@ export default async function TreasuryPage() {
                 <th className={th}>Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-border-subtle">
               {open.map((p) => (
                 <tr key={p.id}>
-                  <td className={`${td} font-mono`}>{day(p.createdAt)}</td>
+                  <td className={cn(td, "font-mono")}>{day(p.createdAt)}</td>
                   <td className={td}>@{p.creatorUsername}</td>
-                  <td className={`${td} font-mono font-bold text-white`}>{money(p.amountCents)}</td>
-                  <td className={`${td} font-mono break-all`}>{p.payoutMethod} · {p.payoutDestination}</td>
+                  <td className={cn(td, "font-mono font-bold text-fg")}>{money(p.amountCents)}</td>
+                  <td className={cn(td, "font-mono break-all")}>{p.payoutMethod} · {p.payoutDestination}</td>
                   <td className={td}>{p.status.replace(/_/g, " ").toLowerCase()}</td>
                   <td className={td}>
                     <div className="flex flex-wrap gap-1.5">
@@ -103,17 +103,17 @@ export default async function TreasuryPage() {
 
       {closed.length > 0 && (
         <>
-          <h2 className="mt-10 mb-3 text-sm font-bold text-white">History</h2>
+          <h2 className="mt-10 mb-3 text-sm font-bold text-fg">History</h2>
           <Panel>
             <table className="w-full">
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-border-subtle">
                 {closed.map((p) => (
                   <tr key={p.id}>
-                    <td className={`${td} font-mono`}>{day(p.createdAt)}</td>
+                    <td className={cn(td, "font-mono")}>{day(p.createdAt)}</td>
                     <td className={td}>@{p.creatorUsername}</td>
-                    <td className={`${td} font-mono`}>{money(p.amountCents)}</td>
+                    <td className={cn(td, "font-mono")}>{money(p.amountCents)}</td>
                     <td className={td}>{p.status.toLowerCase()}</td>
-                    <td className={`${td} font-mono break-all`}>{p.txHashOrReference ?? p.failureReason ?? ""}</td>
+                    <td className={cn(td, "font-mono break-all")}>{p.txHashOrReference ?? p.failureReason ?? ""}</td>
                   </tr>
                 ))}
               </tbody>

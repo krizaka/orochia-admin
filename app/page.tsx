@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { orochia, money } from "@/lib/orochia";
-import { PageTitle, Stat } from "@/components/ui";
+
+import { cn, PageTitle, Stat } from "@/components/ui";
+import { money,orochia } from "@/lib/orochia";
 
 interface Overview {
   treasury: {
@@ -32,18 +33,16 @@ export default async function OverviewPage() {
           <Link
             key={queue.href}
             href={queue.href}
-            className={`rounded-2xl border p-5 transition-colors hover:bg-zinc-900 ${
-              queue.urgent ? "border-rose-500/40 bg-rose-950/20" : "border-white/10 bg-zinc-900/60"
-            }`}
+            className={cn("rounded-xl border p-5 shadow-md transition-colors hover:border-border-strong", queue.urgent ? "border-danger/40 bg-danger/10" : "border-border-default bg-surface-2")}
           >
-            <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">{queue.label}</span>
-            <p className={`mt-2 text-3xl font-black font-mono ${queue.urgent ? "text-rose-300" : "text-white"}`}>{queue.value}</p>
+            <span className="text-[11px] font-mono uppercase tracking-wider text-fg-secondary">{queue.label}</span>
+            <p className={cn("mt-2 font-display text-3xl font-black tabular-nums", queue.urgent ? "text-danger" : "text-fg")}>{queue.value}</p>
           </Link>
         ))}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat label="Gross volume" value={money(t.grossCents)} hint={`${t.creditsCount} payments`} />
-        <Stat label="Platform fees" value={money(t.platformFeeCents)} hint={`${t.protocolRakePercent}% of gross`} tone="text-emerald-400" />
+        <Stat label="Platform fees" value={money(t.platformFeeCents)} hint={`${t.protocolRakePercent}% of gross`} tone="success" />
         <Stat label="Ready videos" value={c.videosByStatus.READY ?? 0} hint={`${(c.videosByStatus.PROCESSING ?? 0) + (c.videosByStatus.PENDING_UPLOAD ?? 0)} in the pipeline`} />
         <Stat label="Total views" value={c.totalViews.toLocaleString("en-US")} />
       </div>

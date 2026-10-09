@@ -1,8 +1,11 @@
 "use client";
 
-import React, { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { OrochiaLogo } from "@krizaka/orochia-design-system";
+import { Button } from "@krizaka/ui/button";
+import { Card } from "@krizaka/ui/card";
+import { Field, Input } from "@krizaka/ui/field";
+import { useRouter, useSearchParams } from "next/navigation";
+import React, { Suspense, useState } from "react";
 
 function LoginForm() {
   const router = useRouter();
@@ -33,39 +36,29 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center px-4">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-3xl border border-white/10 bg-zinc-900/60 p-8 shadow-2xl space-y-4">
-        <div className="text-center">
-          <OrochiaLogo size={72} className="mx-auto mb-2" />
-          <h1 className="text-xl font-bold text-white">Orochia Control Plane</h1>
-          <p className="text-xs text-zinc-400 mt-1">The operator account only</p>
-        </div>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="E-mail"
-          autoComplete="username"
-          required
-          className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-violet-500 focus:outline-hidden"
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          autoComplete="current-password"
-          required
-          className="w-full rounded-xl border border-white/10 bg-zinc-950 px-4 py-2.5 text-sm text-white focus:border-violet-500 focus:outline-hidden"
-        />
-        {error && <p role="alert" className="text-xs text-rose-300">{error}</p>}
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full rounded-xl bg-linear-to-r from-violet-600 to-fuchsia-600 py-2.5 text-sm font-bold text-white disabled:opacity-50"
-        >
-          {busy ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
+      <Card.Root tone="elevated" radius="xl" className="w-full max-w-sm shadow-lg">
+        <Card.Body padding="lg">
+          <form onSubmit={submit} className="space-y-4">
+            <div className="text-center">
+              <OrochiaLogo size={72} className="mx-auto mb-2" />
+              <h1 className="font-display text-xl font-bold text-fg">Orochia Control Plane</h1>
+              <p className="mt-1 text-xs text-fg-secondary">The operator account only</p>
+            </div>
+            <Field.Root>
+              <Field.Label htmlFor="email">E-mail</Field.Label>
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" required />
+            </Field.Root>
+            <Field.Root>
+              <Field.Label htmlFor="password">Password</Field.Label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+            </Field.Root>
+            {error && <Field.Error>{error}</Field.Error>}
+            <Button type="submit" variant="primary" loading={busy} className="w-full">
+              {busy ? "Signing in…" : "Sign in"}
+            </Button>
+          </form>
+        </Card.Body>
+      </Card.Root>
     </div>
   );
 }
