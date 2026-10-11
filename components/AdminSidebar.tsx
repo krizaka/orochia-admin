@@ -9,6 +9,7 @@ import {
   Database,
   ExternalLink,
   Gavel,
+  HardDrive,
   LayoutDashboard,
   ShieldCheck,
   UserCog,
@@ -31,6 +32,7 @@ export function AdminSidebar() {
     { label: "Auctions", href: "/auctions", icon: Gavel },
     { label: "Creator Registry", href: "/creators", icon: Users },
     { label: "Accounts", href: "/users", icon: UserCog },
+    { label: "Storage & Abuse", href: "/storage", icon: HardDrive },
     { label: "Platform & Database", href: "/platform", icon: Database },
   ];
 

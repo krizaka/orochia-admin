@@ -103,3 +103,24 @@ export async function factoryReset(_: ActionState, form: FormData) {
     return `Database rebuilt (${result.migrationsApplied} migration${result.migrationsApplied === 1 ? "" : "s"})${result.backup ? ` — backup ${result.backup.name}` : ""}.`;
   }, { action: "factory reset", detail: form.get("backup") === "on" ? "with backup" : "without backup" });
 }
+
+/** Reconciles Orochia's storage counters with Bunny now (lists the Stream library; nothing is deleted). */
+export async function reconcileStorage(_: ActionState) {
+  return attempt(["/storage"], async () => {
+    const { result } = await orochia<{ result: { libraryVideos: number; updatedRows: number; orphanVideos: number; missingVideos: number; released: number } }>("/api/admin/storage", { method: "POST" });
+    return `Reconciled ${result.libraryVideos} Bunny video${result.libraryVideos === 1 ? "" : "s"}: ${result.updatedRows} row(s) corrected, ${result.missingVideos} missing at Bunny, ${result.orphanVideos} orphan(s)${result.released ? `, ${result.released} held upload(s) released` : ""}.`;
+  }, { action: "storage reconciled with Bunny" });
+}
+
+/** Gives an account a storage plan of QUOTA_PLANS ("default" = the role's default); its held uploads go online if they fit. */
+export async function setStoragePlan(_: ActionState, form: FormData) {
+  const plan = text(form, "plan");
+  return attempt(["/storage"], async () => {
+    const result = await orochia<{ plan: string; released: { videos: string[]; stories: string[] } }>(`/api/admin/storage/${text(form, "id")}`, {
+      method: "PATCH",
+      body: JSON.stringify({ plan: plan === "default" ? null : plan }),
+    });
+    const released = result.released.videos.length + result.released.stories.length;
+    return `Plan set to ${result.plan}${released ? ` — ${released} held upload(s) released` : ""}.`;
+  }, { action: `storage plan → ${plan}`, target: text(form, "id") });
+}

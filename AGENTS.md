@@ -19,7 +19,9 @@
   (client address from App Platform's `do-connecting-ip`). In production an empty list lets nobody in.
 - Screens: overview · 2257 creator verification · content reports · catalogue (takedown / restore) · auctions
   (status, money held, cancel with a reason) · treasury & payouts · creator registry · accounts (suspend / reinstate /
-  role) · platform & database (environment, migration history, rows per table, backups, factory reset).
+  role) · storage & abuse (platform usage against its cap, largest accounts and their storage plans, reconciliation with
+  Bunny, rate-limit store and bot challenge) · platform & database (environment, migration history, rows per table,
+  backups, factory reset).
 - Desktop is the target: tables and dialogs are laid out for a wide screen.
 
 ## 2. Rules
