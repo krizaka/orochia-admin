@@ -67,6 +67,7 @@ tables are created on first use. Deployment: `deploy/Dockerfile` and `deploy/app
 2. The screen works against a seeded Orochia (`npm run db:reset -- --yes` there) with an admin session, and a
    member session is refused.
 3. Any new admin endpoint it relies on is documented and tested in the Orochia repository.
+4. PR captures (screenshots, recordings, metrics) are never committed: they go to Bunny Storage under `pr-assets/<repo>/<pr-or-topic>/` with [`scripts/pr-assets.mjs`](https://github.com/krizaka/krizaka-com/blob/main/scripts/pr-assets.mjs) of krizaka-com (its AGENTS.md §5.1), and the PR body links their CDN URLs. `docs/screenshots/` is git-ignored.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
