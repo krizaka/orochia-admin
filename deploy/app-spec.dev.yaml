@@ -43,6 +43,13 @@ services:
       - key: NEXT_PUBLIC_OROCHIA_APP_URL
         scope: RUN_AND_BUILD_TIME
         value: https://dev.orochia.com
+      # The build badge in the header: "v<version> · dev · <commit>" — never shown in production.
+      - key: NEXT_PUBLIC_APP_ENV
+        scope: BUILD_TIME
+        value: "dev"
+      - key: COMMIT_SHA
+        scope: BUILD_TIME
+        value: ${_self.COMMIT_HASH}
       - key: OROCHIA_ADMIN_API_TOKEN
         scope: RUN_TIME
         type: SECRET

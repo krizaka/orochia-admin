@@ -7,6 +7,7 @@ import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
+import { BuildBadge } from "@/components/BuildBadge";
 import type { AdminIdentity } from "@/lib/account";
 
 /** The console has no i18n: English labels, fixed (one operator, desktop). */
@@ -23,7 +24,10 @@ export function AdminHeader({ admin }: { admin: AdminIdentity }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border-default bg-surface-1/80 px-6 backdrop-blur-xl">
-      <Badge tone="success">Administrator</Badge>
+      <div className="flex items-center gap-2">
+        <Badge tone="success">Administrator</Badge>
+        <BuildBadge />
+      </div>
       <div className="flex items-center gap-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-tr from-accent to-accent-2 text-xs font-bold text-on-accent">
           {initials}
