@@ -40,11 +40,15 @@
   storage, downloaded through this console's `/api/backups/[name]` (the session never reaches the browser).
 - Pages render empty states, never sample data. Links to the consumer app use `NEXT_PUBLIC_OROCHIA_APP_URL`.
 - UI comes from the platform primitives [`@krizaka/ui`](https://github.com/krizaka/krizaka-ui) (`Button`/`buttonVariants`,
-  `Card`, `Stat`, `PageHeader`, `EmptyState`, `AlertDialog`, `Field`, `Badge`, theme) and the Orochia identity
+  `Card`, `Stat`, `PageHeader`, `EmptyState`, `AlertDialog`, `Field`, `Badge`, `Meter`, `Loader` / `Skeleton` in
+  `app/loading.tsx`, theme), the charts of [`@krizaka/charts`](https://www.npmjs.com/package/@krizaka/charts) (overview:
+  platform revenue and reports over 12 months, the catalogue; storage: the platform gauge, the largest accounts — under
+  one `ChartsProvider brand="orochia"` in the layout; the series come from Orochia's admin API, never computed here) and the Orochia identity
   [`@krizaka/orochia-design-system`](https://github.com/krizaka/orochia-design-system) (`OrochiaLogo`, `theme.css`), on
   npm; never a copy. `components/ui.tsx` only wraps them with the console's words. A missing component is added to the
   platform first. Tailwind CSS v4 is configured in `app/globals.css` (no `tailwind.config.js`), in this order:
-  `tailwindcss` → `@krizaka/tailwind` → `@krizaka/ui/tailwind.css` → `@krizaka/orochia-design-system/theme.css`.
+  `tailwindcss` → `@krizaka/tailwind` → `@krizaka/ui/tailwind.css` → `@krizaka/orochia-design-system/theme.css` →
+  `@krizaka/tokens/brands/orochia.css`.
 - **Dark and light** are both first-class (`ThemeScript` + `ThemeProvider`, the toggle in the header). Components use
   role utilities only (`bg-surface-*`, `text-fg*`, `border-border-*`, `text-accent`, `text-success|warning|danger`):
   `npm run lint` refuses raw palette colours, `light:`, `[var(--…)]` and template strings in `className`
