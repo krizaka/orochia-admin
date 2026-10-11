@@ -9,3 +9,6 @@ build/
 .env.production.local
 *.tsbuildinfo
 .env*.local
+
+# PR captures go to Bunny Storage (krizaka-com scripts/pr-assets.mjs), never into the repository
+docs/screenshots/
