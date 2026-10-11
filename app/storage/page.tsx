@@ -1,3 +1,5 @@
+import { BarChart } from "@krizaka/charts/bar";
+import { Gauge } from "@krizaka/charts/gauge";
 import { HardDrive, RefreshCw, ShieldCheck, Users } from "lucide-react";
 
 import { reconcileStorage, setStoragePlan } from "@/app/actions";
@@ -70,6 +72,8 @@ const size = (bytes: number | null) =>
       : bytes >= 1024 ** 3
         ? `${(bytes / 1024 ** 3).toFixed(1)} GB`
         : `${Math.round(bytes / 1024 ** 2)} MB`;
+const GB = 1024 ** 3;
+const GB_FORMAT = { style: "unit", unit: "gigabyte" } as const;
 const minutes = (seconds: number | null) => (seconds === null ? "unlimited" : `${Math.round(seconds / 60).toLocaleString("en-US")} min`);
 const when = (iso: string) => new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 
@@ -115,24 +119,43 @@ export default async function StoragePage() {
       </div>
 
       {s.enabled && p.limit.bytes !== null && (
-        <Panel className="mb-8">
-          {/* The console's @krizaka/ui (2.0.0-beta.1) has no Progress yet: a bar from the role tokens, with its ARIA. */}
-          <div
-            role="progressbar"
-            aria-label="Platform storage used"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.min(100, Math.round(p.percent ?? 0))}
-            aria-valuetext={`${size(p.used.bytes)} of ${size(p.limit.bytes)}`}
-            className="h-2 w-full overflow-hidden rounded-full bg-surface-3"
-          >
-            <div className={cn("h-full rounded-full", level.tone === "danger" ? "bg-danger" : level.tone === "warning" ? "bg-warning" : "bg-accent")} style={{ width: `${Math.min(100, Math.max(1, p.percent ?? 0))}%` }} />
-          </div>
-          <p className="mt-3 text-xs text-fg-secondary">
-            Past 100 %, new uploads are refused for everyone (<span className="font-mono">PLATFORM_STORAGE_FULL</span>); raise{" "}
-            <span className="font-mono">QUOTA_PLATFORM_GB</span> on the deployment or free space. Withdrawn videos and expired stories still count here: their files stay at Bunny.
-          </p>
-        </Panel>
+        <div className="mb-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+          <Panel>
+            <Gauge
+              title="Platform storage"
+              description={`${size(p.used.bytes)} of ${size(p.limit.bytes)} at Bunny`}
+              value={Math.min(p.used.bytes, p.limit.bytes) / GB}
+              max={p.limit.bytes / GB}
+              format={GB_FORMAT}
+              caption="used"
+              zones={[
+                { to: (p.limit.bytes * 0.8) / GB, tone: "success", label: "Room to grow" },
+                { to: (p.limit.bytes * 0.95) / GB, tone: "warning", label: "Above 80 %" },
+                { to: p.limit.bytes / GB, tone: "danger", label: "Above 95 %" },
+              ]}
+              height={170}
+            />
+            <p className="mt-3 text-xs text-fg-secondary">
+              Past 100 %, new uploads are refused for everyone (<span className="font-mono">PLATFORM_STORAGE_FULL</span>); raise{" "}
+              <span className="font-mono">QUOTA_PLATFORM_GB</span> on the deployment or free space. Withdrawn videos and expired stories still count here: their files stay at Bunny.
+            </p>
+          </Panel>
+          <Panel>
+            <BarChart
+              title="Who keeps the most"
+              description="The ten largest accounts at Bunny, in GB."
+              data={s.topCreators.filter((c) => c.usedBytes > 0).slice(0, 10).map((c) => ({ account: `@${c.username}`, gb: c.usedBytes / GB }))}
+              x="account"
+              y="gb"
+              yLabel="Storage"
+              xLabel="Account"
+              format={GB_FORMAT}
+              horizontal
+              height={260}
+              empty="Nobody keeps anything at Bunny yet."
+            />
+          </Panel>
+        </div>
       )}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">

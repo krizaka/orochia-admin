@@ -10,10 +10,11 @@
     "lint": "eslint . && krizaka-ratchet"
   },
   "dependencies": {
-    "@krizaka/orochia-design-system": "^3.0.0",
-    "@krizaka/tailwind": "^2.0.0-beta.1",
-    "@krizaka/tokens": "^2.0.0-beta.1",
-    "@krizaka/ui": "^2.0.0-beta.1",
+    "@krizaka/charts": "^0.1.0",
+    "@krizaka/orochia-design-system": "^4.1.1",
+    "@krizaka/tailwind": "^2.3.0",
+    "@krizaka/tokens": "^2.3.0",
+    "@krizaka/ui": "^2.3.0",
     "lucide-react": "^1.52.0",
     "next": "^16.4.0",
     "pg": "^8.23.1",

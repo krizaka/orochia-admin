@@ -1,5 +1,6 @@
 import "./globals.css";
 
+import { ChartsProvider } from "@krizaka/charts/provider";
 import { ThemeProvider, ThemeScript } from "@krizaka/ui/theme";
 import type { Metadata } from "next";
 
@@ -25,6 +26,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body className="min-h-screen bg-surface-0 text-fg antialiased">
         <ThemeProvider>
+          {/* Every chart of the console in the Orochia palette (violet first), figures in en-US. */}
+          <ChartsProvider brand="orochia" locale="en-US">
           {admin ? (
             <div className="flex min-h-screen">
               <AdminSidebar />
@@ -36,6 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           ) : (
             children
           )}
+          </ChartsProvider>
         </ThemeProvider>
       </body>
     </html>
