@@ -74,6 +74,9 @@ tables are created on first use. Deployment: `deploy/Dockerfile` and `deploy/app
    member session is refused.
 3. Any new admin endpoint it relies on is documented and tested in the Orochia repository.
 4. PR captures (screenshots, recordings, metrics) are never committed: they go to Bunny Storage under `pr-assets/<repo>/<pr-or-topic>/` with [`scripts/pr-assets.mjs`](https://github.com/krizaka/krizaka-com/blob/main/scripts/pr-assets.mjs) of krizaka-com (its AGENTS.md §5.1), and the PR body links their CDN URLs. `docs/screenshots/` is git-ignored.
+5. Every feature and every fix ships with its tests — no test, not done. This repository has no test runner yet: the
+   first change that needs one adds Vitest and wires `npm test` into CI; a fix starts with a failing test that
+   reproduces the bug; the endpoint side is tested in Orochia (3).
 
 <!-- BEGIN:nextjs-agent-rules -->
 
