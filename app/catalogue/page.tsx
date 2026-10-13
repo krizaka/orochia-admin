@@ -34,7 +34,7 @@ export default async function CataloguePage(props: { searchParams: Promise<{ sta
     orochia<{ videos: CatalogueVideo[] }>(`/api/admin/videos?${params}`),
   ]);
   const s = data.videosByStatus;
-  const appUrl = process.env.NEXT_PUBLIC_OROCHIA_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_OPERATOR_PLATFORM_URL || "http://localhost:3000";
 
   return (
     <div>

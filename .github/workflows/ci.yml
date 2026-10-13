@@ -26,6 +26,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
+      - run: npm test
       - run: npm run build
         env:
-          OROCHIA_API_URL: http://localhost:3000
+          OPERATOR_API_URL: http://localhost:3000

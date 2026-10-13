@@ -7,7 +7,9 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "eslint . && krizaka-ratchet"
+    "lint": "eslint . && krizaka-ratchet",
+    "test": "vitest run",
+    "docs:generate": "UPDATE_DOCS=1 vitest run lib/env.test.ts"
   },
   "dependencies": {
     "@krizaka/charts": "^0.1.0",
@@ -19,7 +21,8 @@
     "next": "^16.4.0",
     "pg": "^8.23.1",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react-dom": "^19.3.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@krizaka/config": "^0.1.0",
@@ -32,7 +35,8 @@
     "eslint-config-next": "^16.4.0",
     "postcss": "^8.4.41",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^4.1.11"
   },
   "license": "Apache-2.0",
   "overrides": {

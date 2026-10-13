@@ -6,7 +6,7 @@ import { sql } from "./db";
 
 /**
  * The console has exactly one account: the default operator, defined by environment —
- * ADMIN_EMAIL, ADMIN_NAME, ADMIN_PASSWORD (12+ characters). It is written to the console's database on first use and
+ * AUTH_OPERATOR_EMAIL, AUTH_OPERATOR_NAME, AUTH_OPERATOR_PASSWORD (12+ characters). It is written to the console's database on first use and
  * whenever the environment changes it (a new password revokes every open session). Nobody signs up; there is no
  * second account. Sessions are random tokens stored hashed, 8 hours, httpOnly cookie.
  */
@@ -20,10 +20,10 @@ export interface AdminIdentity {
 }
 
 function fromEnv() {
-  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-  const name = process.env.ADMIN_NAME?.trim();
-  const password = process.env.ADMIN_PASSWORD ?? "";
-  if (!email || !name || password.length < 12) throw new Error("ADMIN_EMAIL, ADMIN_NAME and ADMIN_PASSWORD (12+ characters) must be set");
+  const email = process.env.AUTH_OPERATOR_EMAIL?.trim().toLowerCase();
+  const name = process.env.AUTH_OPERATOR_NAME?.trim();
+  const password = process.env.AUTH_OPERATOR_PASSWORD ?? "";
+  if (!email || !name || password.length < 12) throw new Error("AUTH_OPERATOR_EMAIL, AUTH_OPERATOR_NAME and AUTH_OPERATOR_PASSWORD (12+ characters) must be set");
   return { email, name, password };
 }
 

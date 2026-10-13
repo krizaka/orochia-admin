@@ -186,7 +186,7 @@ export default async function PlatformPage() {
             </p>
             {!p.reset.allowed && (
               <p className="mt-2 font-semibold text-danger">
-                Disabled on this deployment. It is available only where OROCHIA_ALLOW_DATABASE_RESET=true and never on the indexed production.
+                Disabled on this deployment. It is available only where DATABASE_ALLOW_RESET=true and never on the indexed production.
               </p>
             )}
           </div>

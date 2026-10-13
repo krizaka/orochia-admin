@@ -4,7 +4,7 @@ const ADMIN_COOKIE = "orochia_admin_session";
 
 /**
  * Two gates before any page or route:
- * 1. Network — when ADMIN_ALLOWED_IPS is set (comma-separated addresses), every other client gets 403, sign-in page
+ * 1. Network — when AUTH_ALLOWED_IPS is set (comma-separated addresses), every other client gets 403, sign-in page
  *    included. The client address is DigitalOcean's `do-connecting-ip` (set by its edge, not by the client); locally,
  *    the first `x-forwarded-for` hop. In production the list is mandatory: without it the console answers 403 to all.
  *    Only `/api/health` (liveness, no data) is outside it.
@@ -15,7 +15,7 @@ function clientIp(req: NextRequest): string | null {
 }
 
 function allowed(ip: string | null): boolean {
-  const list = (process.env.ADMIN_ALLOWED_IPS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const list = (process.env.AUTH_ALLOWED_IPS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
   if (list.length === 0) return process.env.NODE_ENV !== "production";
   return ip !== null && list.includes(ip);
 }
