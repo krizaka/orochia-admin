@@ -83,7 +83,7 @@ export function AdminSidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-border-subtle space-y-3">
         <a
-          href={process.env.NEXT_PUBLIC_OROCHIA_APP_URL || "http://localhost:3000"}
+          href={process.env.NEXT_PUBLIC_OPERATOR_PLATFORM_URL || "http://localhost:3000"}
           target="_blank"
           rel="noreferrer"
           className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-fg-secondary hover:text-fg hover:bg-surface-2 transition-colors"

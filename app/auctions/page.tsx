@@ -45,7 +45,7 @@ export default async function AuctionsPage(props: { searchParams: Promise<{ stat
   const count = (s: string) => all.filter((a) => a.status === s).length;
   const soldVolume = all.filter((a) => a.status === "SOLD").reduce((sum, a) => sum + a.highestBidCents, 0);
   const held = all.filter((a) => a.status === "OPEN" || a.status === "AWAITING_DECISION").reduce((sum, a) => sum + a.highestBidCents, 0);
-  const appUrl = process.env.NEXT_PUBLIC_OROCHIA_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.NEXT_PUBLIC_OPERATOR_PLATFORM_URL || "http://localhost:3000";
 
   return (
     <div>

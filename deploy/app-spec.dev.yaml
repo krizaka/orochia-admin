@@ -27,34 +27,34 @@ services:
         scope: RUN_TIME
         value: ${admin-db.CA_CERT}
       # The single operator account.
-      - key: ADMIN_EMAIL
+      - key: AUTH_OPERATOR_EMAIL
         scope: RUN_TIME
         type: GENERAL
-      - key: ADMIN_NAME
+      - key: AUTH_OPERATOR_NAME
         scope: RUN_TIME
         type: GENERAL
-      - key: ADMIN_PASSWORD
+      - key: AUTH_OPERATOR_PASSWORD
         scope: RUN_TIME
         type: SECRET
-      # Orochia's API and the service token shared with it (OROCHIA_ADMIN_API_TOKEN on orochia-dev).
-      - key: OROCHIA_API_URL
+      # Orochia's API and the service token shared with it (OPERATOR_API_TOKEN on orochia-dev).
+      - key: OPERATOR_API_URL
         scope: RUN_TIME
         value: https://dev.orochia.com
-      - key: NEXT_PUBLIC_OROCHIA_APP_URL
+      - key: NEXT_PUBLIC_OPERATOR_PLATFORM_URL
         scope: RUN_AND_BUILD_TIME
         value: https://dev.orochia.com
       # The build badge in the header: "v<version> · dev · <commit>" — never shown in production.
       - key: NEXT_PUBLIC_APP_ENV
         scope: BUILD_TIME
         value: "dev"
-      - key: COMMIT_SHA
+      - key: APP_COMMIT_SHA
         scope: BUILD_TIME
         value: ${_self.COMMIT_HASH}
-      - key: OROCHIA_ADMIN_API_TOKEN
+      - key: OPERATOR_API_TOKEN
         scope: RUN_TIME
         type: SECRET
       # Only these client addresses reach the console (do-connecting-ip), sign-in page included.
-      - key: ADMIN_ALLOWED_IPS
+      - key: AUTH_ALLOWED_IPS
         scope: RUN_TIME
         type: GENERAL
 

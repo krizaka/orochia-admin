@@ -10,12 +10,12 @@
 - A Next.js 16 **server-side BFF** with **its own small database** (`DATABASE_URL`, `lib/db.ts`): the single operator
   account, its sessions and the **operator log** of every decision and sign-in. Orochia's data is never read from
   Orochia's database: every figure and every action goes through Orochia's `/api/admin/*` endpoints.
-- **One account, the default operator**, defined by environment (`ADMIN_EMAIL`, `ADMIN_NAME`, `ADMIN_PASSWORD`,
+- **One account, the default operator**, defined by environment (`AUTH_OPERATOR_EMAIL`, `AUTH_OPERATOR_NAME`, `AUTH_OPERATOR_PASSWORD`,
   `lib/account.ts`): written to the console's database, refreshed when the environment changes (a new password closes
   every session). No sign-up, no second user. Sessions: random tokens stored hashed, httpOnly cookie, 8 hours.
-- The console calls Orochia as a **service**: `Authorization: Bearer OROCHIA_ADMIN_API_TOKEN` (same value on both
+- The console calls Orochia as a **service**: `Authorization: Bearer OPERATOR_API_TOKEN` (same value on both
   deployments). Orochia accepts it on ADMIN routes only and acts as its owner account. The token never reaches the browser.
-- **Network gate** (`proxy.ts`): only the addresses in `ADMIN_ALLOWED_IPS` reach the console, sign-in page included
+- **Network gate** (`proxy.ts`): only the addresses in `AUTH_ALLOWED_IPS` reach the console, sign-in page included
   (client address from App Platform's `do-connecting-ip`). In production an empty list lets nobody in.
 - Screens: overview · 2257 creator verification · content reports · catalogue (takedown / restore) · auctions
   (status, money held, cancel with a reason) · treasury & payouts · creator registry · accounts (suspend / reinstate /
@@ -36,9 +36,15 @@
   type a phrase (the factory reset: `reset <database>`), and offers a backup first. Only benign, reversible steps
   (start review, reopen) run in one click (`direct`).
 - **Factory reset** is an Orochia endpoint (`/api/admin/platform/reset`), refused unless the deployment sets
-  `OROCHIA_ALLOW_DATABASE_RESET=true` and is not the indexed production. Backups are gzipped JSON in Orochia's private
+  `DATABASE_ALLOW_RESET=true` and is not the indexed production. Backups are gzipped JSON in Orochia's private
   storage, downloaded through this console's `/api/backups/[name]` (the session never reaches the browser).
-- Pages render empty states, never sample data. Links to the consumer app use `NEXT_PUBLIC_OROCHIA_APP_URL`.
+- **Environment variables are named by bounded context** (krizaka/.github#46): `<CONTEXT>_<THING>` — `APP_`, `DATABASE_`,
+  `AUTH_` (the operator account, `AUTH_ALLOWED_IPS`), `OPERATOR_` (the platform's admin API: `OPERATOR_API_URL`,
+  `OPERATOR_API_TOKEN`, the same name and value as on the platform) — never a product (`OROCHIA_…`) nor a vendor;
+  `NEXT_PUBLIC_` only where the browser needs it. Each one is declared in `lib/env.ts` (zod): `npm test` refuses an
+  undeclared or misnamed one, a deployment with a bad environment does not start, README's table is generated
+  (`npm run docs:generate`).
+- Pages render empty states, never sample data. Links to the consumer app use `NEXT_PUBLIC_OPERATOR_PLATFORM_URL`.
 - UI comes from the platform primitives [`@krizaka/ui`](https://github.com/krizaka/krizaka-ui) (`Button`/`buttonVariants`,
   `Card`, `Stat`, `PageHeader`, `EmptyState`, `AlertDialog`, `Field`, `Badge`, `Meter`, `Loader` / `Skeleton` in
   `app/loading.tsx`, theme), the charts of [`@krizaka/charts`](https://www.npmjs.com/package/@krizaka/charts) (overview:
@@ -62,7 +68,7 @@ cp .env.example .env.local      # its own database, the operator account, the to
 npm run dev                     # :3001 — Orochia must be running (npm run setup && npm run dev)
 ```
 
-Sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Locally, create the database once
+Sign in with `AUTH_OPERATOR_EMAIL` / `AUTH_OPERATOR_PASSWORD`. Locally, create the database once
 (`docker exec orochia-postgres-dev psql -U orochia_user -d orochia_db -c "CREATE DATABASE orochia_admin"`); the
 tables are created on first use. Deployment: `deploy/Dockerfile` and `deploy/app-spec.dev.yaml` (App Platform, project
 `orochia`, its own dev database).

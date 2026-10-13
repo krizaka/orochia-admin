@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const attempts = new Map<string, { count: number; resetAt: number }>();
 
-/** Operator sign-in: the console's single account (ADMIN_EMAIL / ADMIN_PASSWORD). Ten attempts per 15 minutes and IP. */
+/** Operator sign-in: the console's single account (AUTH_OPERATOR_EMAIL / AUTH_OPERATOR_PASSWORD). Ten attempts per 15 minutes and IP. */
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("do-connecting-ip")?.trim() || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   const now = Date.now();

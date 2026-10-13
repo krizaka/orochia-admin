@@ -64,7 +64,7 @@ export default async function ModerationPage(props: { searchParams: Promise<{ st
                     {r.videoId ? (
                       <a
                         className="text-accent hover:underline"
-                        href={`${process.env.NEXT_PUBLIC_OROCHIA_APP_URL || "http://localhost:3000"}/watch/${r.videoId}`}
+                        href={`${process.env.NEXT_PUBLIC_OPERATOR_PLATFORM_URL || "http://localhost:3000"}/watch/${r.videoId}`}
                         target="_blank"
                         rel="noreferrer"
                       >
