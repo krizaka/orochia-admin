@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error) {
     console.error("[admin] sign-in failed", error);
-    return NextResponse.json({ error: "The console is not configured (database or ADMIN_* variables)" }, { status: 503 });
+    return NextResponse.json({ error: "The console is not configured (database or AUTH_OPERATOR_* variables)" }, { status: 503 });
   }
 }
 
