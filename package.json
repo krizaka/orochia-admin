@@ -17,7 +17,7 @@
     "@krizaka/tailwind": "^2.3.0",
     "@krizaka/tokens": "^2.3.0",
     "@krizaka/ui": "^2.3.0",
-    "lucide-react": "^1.52.0",
+    "lucide-react": "^1.55.0",
     "next": "^16.4.0",
     "pg": "^8.23.1",
     "react": "^19.3.0",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "@krizaka/config": "^0.1.0",
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
@@ -36,7 +36,7 @@
     "postcss": "^8.4.41",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.5.4",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.3"
   },
   "license": "Apache-2.0",
   "overrides": {
