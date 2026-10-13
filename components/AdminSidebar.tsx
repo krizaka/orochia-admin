@@ -44,7 +44,7 @@ export function AdminSidebar() {
           <OrochiaLogo size={40} />
           <div>
             <span className="text-sm font-black tracking-wider text-fg font-display">
-              OROCHIA<span className="text-accent">.</span>
+              OROCHIA<span className="text-fg-accent">.</span>
             </span>
             <span className="block text-[10px] font-mono text-fg-secondary uppercase tracking-widest leading-none">
               Control Plane

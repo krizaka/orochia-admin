@@ -24,12 +24,12 @@ interface AdminAuction {
 const STATUSES = ["all", "OPEN", "AWAITING_DECISION", "SOLD", "DECLINED", "UNSOLD", "CANCELLED"] as const;
 const LABEL: Record<string, string> = { all: "All", OPEN: "Open", AWAITING_DECISION: "Awaiting decision", SOLD: "Sold", DECLINED: "Declined", UNSOLD: "No bids", CANCELLED: "Cancelled" };
 const TONE: Record<string, string> = {
-  OPEN: "text-danger",
-  AWAITING_DECISION: "text-warning",
-  SOLD: "text-success",
+  OPEN: "text-fg-danger",
+  AWAITING_DECISION: "text-fg-warning",
+  SOLD: "text-fg-success",
   DECLINED: "text-fg-secondary",
   UNSOLD: "text-fg-secondary",
-  CANCELLED: "text-fg-muted",
+  CANCELLED: "text-fg-secondary",
 };
 
 const when = (iso: string) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -96,19 +96,19 @@ export default async function AuctionsPage(props: { searchParams: Promise<{ stat
               {list.map((a) => (
                 <tr key={a.id}>
                   <td className={td}>
-                    <a className="text-accent hover:underline" href={`${appUrl}/watch/${a.videoId}#auction`} target="_blank" rel="noreferrer">
+                    <a className="text-fg-accent hover:underline" href={`${appUrl}/watch/${a.videoId}#auction`} target="_blank" rel="noreferrer">
                       {a.videoTitle}
                     </a>
-                    {a.cancelReason && <p className="mt-0.5 text-[10px] text-fg-muted">cancelled — {a.cancelReason}</p>}
+                    {a.cancelReason && <p className="mt-0.5 text-[10px] text-fg-secondary">cancelled — {a.cancelReason}</p>}
                   </td>
                   <td className={cn(td, "font-mono")}>@{a.creatorUsername}</td>
                   <td className={cn(td, "font-semibold", TONE[a.status])}>
                     {LABEL[a.status]}
-                    {a.decisionDeadline && <p className="font-mono text-[10px] font-normal text-fg-muted">by {when(a.decisionDeadline)}</p>}
+                    {a.decisionDeadline && <p className="font-mono text-[10px] font-normal text-fg-secondary">by {when(a.decisionDeadline)}</p>}
                   </td>
                   <td className={cn(td, "font-mono")}>
                     <span className="font-bold text-fg">{money(a.bidsCount > 0 ? a.highestBidCents : a.startingPriceCents)}</span>
-                    <p className="text-[10px] text-fg-muted">from {money(a.startingPriceCents)}</p>
+                    <p className="text-[10px] text-fg-secondary">from {money(a.startingPriceCents)}</p>
                   </td>
                   <td className={cn(td, "font-mono")}>
                     {a.bidsCount}
@@ -116,11 +116,11 @@ export default async function AuctionsPage(props: { searchParams: Promise<{ stat
                   </td>
                   <td className={cn(td, "whitespace-nowrap font-mono text-[11px]")}>
                     {when(a.startsAt)}
-                    <p className="text-fg-muted">→ {when(a.endsAt)}</p>
+                    <p className="text-fg-secondary">→ {when(a.endsAt)}</p>
                   </td>
                   <td className={cn(td, "text-[11px]")}>
                     {a.rights === "DOWNLOAD" ? "watch + download" : "watch"}
-                    <p className="text-fg-muted">{a.settlement === "HIGHEST_BID" ? "sells automatically" : "creator decides"}</p>
+                    <p className="text-fg-secondary">{a.settlement === "HIGHEST_BID" ? "sells automatically" : "creator decides"}</p>
                   </td>
                   <td className={td}>
                     {(a.status === "OPEN" || a.status === "AWAITING_DECISION") && (
@@ -140,7 +140,7 @@ export default async function AuctionsPage(props: { searchParams: Promise<{ stat
                         confirmLabel="Cancel the auction"
                       />
                     )}
-                    {a.status !== "OPEN" && a.status !== "AWAITING_DECISION" && <span className="text-[11px] text-fg-muted">{day(a.endsAt)}</span>}
+                    {a.status !== "OPEN" && a.status !== "AWAITING_DECISION" && <span className="text-[11px] text-fg-secondary">{day(a.endsAt)}</span>}
                   </td>
                 </tr>
               ))}

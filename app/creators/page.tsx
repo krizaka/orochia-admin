@@ -39,12 +39,12 @@ export default async function CreatorsPage() {
                 <tr key={c.id}>
                   <td className={td}>
                     <span className="font-semibold text-fg">{c.displayName}</span>
-                    <span className="block text-fg-muted font-mono">@{c.username} · {c.email}</span>
+                    <span className="block text-fg-secondary font-mono">@{c.username} · {c.email}</span>
                   </td>
                   <td className={cn(td, "font-mono")}>{day(c.createdAt)}</td>
                   <td className={cn(td, "font-mono")}>{c.videosCount}</td>
                   <td className={cn(td, "font-mono")}>{money(c.totalTipsEarnedCents)}</td>
-                  <td className={td}>{c.isVerified ? <span className="text-success">verified</span> : <span className="text-warning">pending</span>}</td>
+                  <td className={td}>{c.isVerified ? <span className="text-fg-success">verified</span> : <span className="text-fg-warning">pending</span>}</td>
                   <td className={td}>
                     {c.isVerified ? (
                       <ConfirmDialog

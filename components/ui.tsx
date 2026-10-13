@@ -15,10 +15,10 @@ export function PageTitle({ title, subtitle, actions }: { title: string; subtitl
 export type Tone = "default" | "success" | "warning" | "danger" | "accent";
 export const toneText: Record<Tone, string> = {
   default: "",
-  success: "text-success",
-  warning: "text-warning",
-  danger: "text-danger",
-  accent: "text-accent",
+  success: "text-fg-success",
+  warning: "text-fg-warning",
+  danger: "text-fg-danger",
+  accent: "text-fg-accent",
 };
 
 /** A figure in a card: the platform's Stat inside an elevated Card. */
@@ -48,14 +48,14 @@ export function Panel({ children, className }: { children: React.ReactNode; clas
   );
 }
 
-export const th = "py-2 pr-4 text-left text-[10px] uppercase tracking-wider text-fg-muted font-semibold";
+export const th = "py-2 pr-4 text-left text-[10px] uppercase tracking-wider text-fg-secondary font-semibold";
 export const td = "py-2.5 pr-4 text-xs text-fg-secondary align-top";
 /** Table bodies: a subtle rule between rows. */
 export const tbody = "divide-y divide-border-subtle";
 /** Strong text in a cell (a name, an amount). */
 export const strong = "font-semibold text-fg";
 /** Links to the consumer app. */
-export const link = "text-accent hover:underline";
+export const link = "text-fg-accent hover:underline";
 /** Table and form actions: the platform's secondary button, small. */
 export const button = buttonVariants({ variant: "secondary", size: "sm" });
 /** A filter link: a small button, highlighted when it is the current one (aria-current). */

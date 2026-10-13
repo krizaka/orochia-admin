@@ -71,7 +71,7 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                 <tr key={u.id}>
                   <td className={td}>
                     <p className="font-semibold text-fg">{u.displayName}</p>
-                    <p className="font-mono text-[10px] text-fg-muted">@{u.username} · {u.email}</p>
+                    <p className="font-mono text-[10px] text-fg-secondary">@{u.username} · {u.email}</p>
                   </td>
                   <td className={td}>
                     <span className="mr-2 font-semibold text-fg">{u.role.toLowerCase()}</span>
@@ -87,12 +87,12 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                     />
                   </td>
                   <td className={cn(td, "text-[11px]")}>
-                    <span className={u.isAgeVerified ? "text-success" : "text-fg-muted"}>18+</span>
-                    {u.role === "CREATOR" && <span className={cn("ml-2", u.isVerified ? "text-success" : "text-warning")}>2257 {u.isVerified ? "✓" : "pending"}</span>}
+                    <span className={u.isAgeVerified ? "text-fg-success" : "text-fg-secondary"}>18+</span>
+                    {u.role === "CREATOR" && <span className={cn("ml-2", u.isVerified ? "text-fg-success" : "text-fg-warning")}>2257 {u.isVerified ? "✓" : "pending"}</span>}
                   </td>
                   <td className={cn(td, "font-mono whitespace-nowrap")}>{day(u.createdAt)}</td>
                   <td className={td}>
-                    {u.suspendedAt ? <span className="text-danger">suspended — {u.suspensionReason}</span> : <span className="text-success">active</span>}
+                    {u.suspendedAt ? <span className="text-fg-danger">suspended — {u.suspensionReason}</span> : <span className="text-fg-success">active</span>}
                   </td>
                   <td className={td}>
                     {u.suspendedAt ? (
