@@ -90,7 +90,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
   const hidden = Object.entries(fields).map(([name, value]) => <input key={name} type="hidden" name={name} value={value} />);
   const answered = open && state !== base;
   const feedback = state && (state.ok ? state.message : direct && state.error) && (
-    <span role="status" className={cn("text-[11px]", state.ok ? "text-success" : "text-danger")}>
+    <span role="status" className={cn("text-[11px]", state.ok ? "text-fg-success" : "text-fg-danger")}>
       {state.ok ? state.message : state.error}
     </span>
   );
@@ -154,9 +154,9 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
             )}
           >
             {tone === "danger" ? (
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden />
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-fg-danger" aria-hidden />
             ) : (
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-fg-accent" aria-hidden />
             )}
             <div>{description}</div>
           </div>
@@ -194,7 +194,7 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
                 <input type="checkbox" name={option.name} defaultChecked={option.defaultChecked ?? true} className="mt-0.5 h-4 w-4 accent-accent" />
                 <span>
                   <span className="block text-sm font-semibold text-fg">{option.label}</span>
-                  {option.hint && <span className="mt-0.5 block text-[11px] text-fg-muted">{option.hint}</span>}
+                  {option.hint && <span className="mt-0.5 block text-[11px] text-fg-secondary">{option.hint}</span>}
                 </span>
               </label>
             )}

@@ -34,7 +34,7 @@ export function AdminHeader({ admin }: { admin: AdminIdentity }) {
         </div>
         <div className="hidden text-left sm:block">
           <p className="text-xs font-bold leading-none text-fg">{admin.displayName}</p>
-          <p className="mt-0.5 font-mono text-[10px] text-accent">{admin.email}</p>
+          <p className="mt-0.5 font-mono text-[10px] text-fg-accent">{admin.email}</p>
         </div>
         <ThemeToggle label={(mode) => THEME_LABEL[mode]} variant="secondary" className="ml-2 h-9 w-9" />
         <IconButton label="Sign out" variant="secondary" onClick={signOut} className="h-9 w-9">

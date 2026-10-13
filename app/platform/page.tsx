@@ -25,10 +25,10 @@ const size = (bytes: number) =>
 const when = (iso: string) => new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 
 const HISTORY: Record<Platform["history"]["kind"], { label: string; tone: string; hint: string }> = {
-  current: { label: "Up to date", tone: "text-success", hint: "every migration of this release is applied" },
-  behind: { label: "Behind", tone: "text-warning", hint: "migrations are waiting — the next release job applies them" },
-  empty: { label: "Empty", tone: "text-warning", hint: "no migration applied yet" },
-  rewritten: { label: "History rewritten", tone: "text-danger", hint: "applied migrations this release does not ship — reset needed" },
+  current: { label: "Up to date", tone: "text-fg-success", hint: "every migration of this release is applied" },
+  behind: { label: "Behind", tone: "text-fg-warning", hint: "migrations are waiting — the next release job applies them" },
+  empty: { label: "Empty", tone: "text-fg-warning", hint: "no migration applied yet" },
+  rewritten: { label: "History rewritten", tone: "text-fg-danger", hint: "applied migrations this release does not ship — reset needed" },
 };
 
 /** The platform: environment, database, migrations, backups, and the factory reset of a development database. */
@@ -57,7 +57,7 @@ export default async function PlatformPage() {
         <section aria-labelledby="backups-title">
           <div className="mb-3 flex items-center justify-between gap-4">
             <h2 id="backups-title" className="flex items-center gap-2 text-sm font-bold text-fg">
-              <HardDrive className="h-4 w-4 text-accent" aria-hidden /> Backups
+              <HardDrive className="h-4 w-4 text-fg-accent" aria-hidden /> Backups
             </h2>
             <ConfirmDialog
               action={backupDatabase}
@@ -120,14 +120,14 @@ export default async function PlatformPage() {
         {/* Tables */}
         <section aria-labelledby="tables-title">
           <h2 id="tables-title" className="mb-3 flex items-center gap-2 text-sm font-bold text-fg">
-            <Database className="h-4 w-4 text-accent" aria-hidden /> Tables
+            <Database className="h-4 w-4 text-fg-accent" aria-hidden /> Tables
           </h2>
           <Panel>
             <ul className="grid grid-cols-2 gap-x-6 gap-y-1.5 lg:grid-cols-3">
               {p.tables.map((t) => (
                 <li key={t.name} className="flex items-baseline justify-between gap-2 border-b border-border-subtle py-1 text-[11px]">
                   <span className="truncate font-mono text-fg-secondary">{t.name}</span>
-                  <span className={cn("font-mono tabular-nums", t.rows ? "text-fg" : "text-fg-muted")}>{t.rows.toLocaleString("en-US")}</span>
+                  <span className={cn("font-mono tabular-nums", t.rows ? "text-fg" : "text-fg-secondary")}>{t.rows.toLocaleString("en-US")}</span>
                 </li>
               ))}
             </ul>
@@ -138,8 +138,8 @@ export default async function PlatformPage() {
       {/* Operator log (the console's own database) */}
       <section aria-labelledby="log-title" className="mt-10">
         <h2 id="log-title" className="mb-3 flex items-center gap-2 text-sm font-bold text-fg">
-          <History className="h-4 w-4 text-accent" aria-hidden /> Operator log
-          <span className="text-[11px] font-normal text-fg-muted">— every decision and sign-in, kept in this console&apos;s database</span>
+          <History className="h-4 w-4 text-fg-accent" aria-hidden /> Operator log
+          <span className="text-[11px] font-normal text-fg-secondary">— every decision and sign-in, kept in this console&apos;s database</span>
         </h2>
         {log.length === 0 ? (
           <Empty>Nothing logged yet.</Empty>
@@ -161,7 +161,7 @@ export default async function PlatformPage() {
                     <td className={cn(td, "whitespace-nowrap font-mono")}>{when(new Date(e.at).toISOString())}</td>
                     <td className={cn(td, "font-semibold text-fg")}>{e.action}</td>
                     <td className={cn(td, "max-w-[12rem] truncate font-mono text-[11px]")} title={e.target ?? ""}>{e.target ?? "—"}</td>
-                    <td className={cn(td, e.ok ? "text-success" : "text-danger")}>{e.ok ? "done" : "refused"}</td>
+                    <td className={cn(td, e.ok ? "text-fg-success" : "text-fg-danger")}>{e.ok ? "done" : "refused"}</td>
                     <td className={cn(td, "max-w-md truncate")} title={e.detail ?? ""}>{e.detail ?? ""}</td>
                   </tr>
                 ))}
@@ -173,7 +173,7 @@ export default async function PlatformPage() {
 
       {/* Danger zone */}
       <section aria-labelledby="danger-title" className="mt-10 rounded-3xl border border-danger/30 bg-danger/10 p-6">
-        <h2 id="danger-title" className="flex items-center gap-2 text-sm font-bold text-danger">
+        <h2 id="danger-title" className="flex items-center gap-2 text-sm font-bold text-fg-danger">
           <ShieldAlert className="h-4 w-4" aria-hidden /> Danger zone
         </h2>
         <div className="mt-4 flex flex-wrap items-start justify-between gap-6">
@@ -185,7 +185,7 @@ export default async function PlatformPage() {
               Media files at Bunny are not deleted.
             </p>
             {!p.reset.allowed && (
-              <p className="mt-2 font-semibold text-danger">
+              <p className="mt-2 font-semibold text-fg-danger">
                 Disabled on this deployment. It is available only where DATABASE_ALLOW_RESET=true and never on the indexed production.
               </p>
             )}

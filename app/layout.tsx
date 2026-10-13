@@ -30,10 +30,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ChartsProvider brand="orochia" locale="en-US">
           {admin ? (
             <div className="flex min-h-screen">
+              {/* The first Tab skips the sidebar's ten links (WCAG 2.4.1) — @krizaka/ui's SkipLink when it ships (krizaka/krizaka-ui#134). */}
+              <a
+                href="#content"
+                className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-3 focus:z-[100] focus:rounded-full focus:bg-surface-1 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-fg focus:shadow-lg focus:outline-2 focus:outline-ring"
+              >
+                Skip to content
+              </a>
               <AdminSidebar />
               <div className="flex min-w-0 flex-1 flex-col">
                 <AdminHeader admin={admin} />
-                <main className="flex-1 overflow-y-auto p-6 md:p-8">{children}</main>
+                <main id="content" tabIndex={-1} className="flex-1 overflow-y-auto p-6 outline-none md:p-8">{children}</main>
               </div>
             </div>
           ) : (

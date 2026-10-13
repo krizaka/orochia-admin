@@ -80,18 +80,18 @@ export default async function CataloguePage(props: { searchParams: Promise<{ sta
               {videos.map((v) => (
                 <tr key={v.id}>
                   <td className={td}>
-                    <a className="text-accent hover:underline" href={`${appUrl}/watch/${v.id}`} target="_blank" rel="noreferrer">{v.title}</a>
-                    <p className="text-[10px] font-mono text-fg-muted">{day(v.createdAt)} · {v.visibility.replace(/_/g, " ").toLowerCase()}</p>
+                    <a className="text-fg-accent hover:underline" href={`${appUrl}/watch/${v.id}`} target="_blank" rel="noreferrer">{v.title}</a>
+                    <p className="text-[10px] font-mono text-fg-secondary">{day(v.createdAt)} · {v.visibility.replace(/_/g, " ").toLowerCase()}</p>
                   </td>
                   <td className={cn(td, "font-mono")}>@{v.creatorUsername}</td>
                   <td className={td}>
                     {v.removedAt ? (
-                      <span className="text-danger">taken down — {v.removalReason}</span>
+                      <span className="text-fg-danger">taken down — {v.removalReason}</span>
                     ) : (
-                      <span className={v.status === "READY" ? "text-success" : "text-fg-secondary"}>{v.status.replace(/_/g, " ").toLowerCase()}</span>
+                      <span className={v.status === "READY" ? "text-fg-success" : "text-fg-secondary"}>{v.status.replace(/_/g, " ").toLowerCase()}</span>
                     )}
                   </td>
-                  <td className={cn(td, "font-mono", v.openReports > 0 ? "font-bold text-danger" : "")}>{v.openReports}</td>
+                  <td className={cn(td, "font-mono", v.openReports > 0 ? "font-bold text-fg-danger" : "")}>{v.openReports}</td>
                   <td className={cn(td, "font-mono")}>{v.viewsCount.toLocaleString("en-US")}</td>
                   <td className={td}>
                     {v.removedAt ? (

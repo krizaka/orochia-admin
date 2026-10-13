@@ -56,14 +56,14 @@ export default async function ModerationPage(props: { searchParams: Promise<{ st
                 <tr key={r.id}>
                   <td className={cn(td, "font-mono whitespace-nowrap")}>{day(r.createdAt)}</td>
                   <td className={td}>
-                    <span className={r.reason === "UNDERAGE" || r.reason === "NON_CONSENSUAL" ? "font-bold text-danger" : ""}>
+                    <span className={r.reason === "UNDERAGE" || r.reason === "NON_CONSENSUAL" ? "font-bold text-fg-danger" : ""}>
                       {REASON[r.reason] ?? r.reason}
                     </span>
                   </td>
                   <td className={td}>
                     {r.videoId ? (
                       <a
-                        className="text-accent hover:underline"
+                        className="text-fg-accent hover:underline"
                         href={`${process.env.NEXT_PUBLIC_OPERATOR_PLATFORM_URL || "http://localhost:3000"}/watch/${r.videoId}`}
                         target="_blank"
                         rel="noreferrer"

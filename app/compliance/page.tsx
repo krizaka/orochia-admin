@@ -43,7 +43,7 @@ export default async function CompliancePage() {
                 <tr key={c.id}>
                   <td className={cn(td, "font-mono")}>{day(c.createdAt)}</td>
                   <td className={td}>
-                    <span className="font-semibold text-fg">{c.displayName}</span> <span className="text-fg-muted">@{c.username}</span>
+                    <span className="font-semibold text-fg">{c.displayName}</span> <span className="text-fg-secondary">@{c.username}</span>
                   </td>
                   <td className={cn(td, "font-mono")}>{c.email}</td>
                   <td className={td}>

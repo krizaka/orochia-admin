@@ -161,7 +161,7 @@ export default async function StoragePage() {
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <section aria-labelledby="accounts-title">
           <h2 id="accounts-title" className="mb-3 flex items-center gap-2 text-sm font-bold text-fg">
-            <Users className="h-4 w-4 text-accent" aria-hidden /> Largest accounts
+            <Users className="h-4 w-4 text-fg-accent" aria-hidden /> Largest accounts
           </h2>
           {s.topCreators.length === 0 ? (
             <Empty>Nobody keeps anything at Bunny yet.</Empty>
@@ -183,17 +183,17 @@ export default async function StoragePage() {
                     <tr key={c.id}>
                       <td className={td}>
                         <span className={strong}>{c.displayName ?? c.username}</span>
-                        <span className="block font-mono text-[11px] text-fg-muted">@{c.username} · {c.role.toLowerCase()}</span>
+                        <span className="block font-mono text-[11px] text-fg-secondary">@{c.username} · {c.role.toLowerCase()}</span>
                       </td>
                       <td className={cn(td, "font-mono")}>{c.plan}</td>
                       <td className={cn(td, "whitespace-nowrap font-mono")}>
                         {size(c.usedBytes)}
-                        <span className={cn("block text-[11px]", c.percent !== null && c.percent >= 95 ? "text-danger" : c.percent !== null && c.percent >= 80 ? "text-warning" : "text-fg-muted")}>
+                        <span className={cn("block text-[11px]", c.percent !== null && c.percent >= 95 ? "text-fg-danger" : c.percent !== null && c.percent >= 80 ? "text-fg-warning" : "text-fg-secondary")}>
                           {c.limitBytes === null ? "no limit" : `of ${size(c.limitBytes)} · ${c.percent} %`}
                         </span>
                       </td>
                       <td className={cn(td, "whitespace-nowrap font-mono")}>{minutes(c.usedSeconds)}</td>
-                      <td className={cn(td, c.held ? "font-semibold text-warning" : "text-fg-muted")}>{c.held || "—"}</td>
+                      <td className={cn(td, c.held ? "font-semibold text-fg-warning" : "text-fg-secondary")}>{c.held || "—"}</td>
                       <td className={td}>
                         <ConfirmDialog
                           action={setStoragePlan}
@@ -217,28 +217,28 @@ export default async function StoragePage() {
         <div className="space-y-6">
           <section aria-labelledby="reconcile-title">
             <h2 id="reconcile-title" className="mb-3 flex items-center gap-2 text-sm font-bold text-fg">
-              <HardDrive className="h-4 w-4 text-accent" aria-hidden /> Last reconciliation
+              <HardDrive className="h-4 w-4 text-fg-accent" aria-hidden /> Last reconciliation
             </h2>
             {!last ? (
               <Empty>Never reconciled with Bunny yet.</Empty>
             ) : (
               <Panel>
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
-                  <dt className="text-fg-muted">When</dt>
+                  <dt className="text-fg-secondary">When</dt>
                   <dd className="font-mono text-fg">{when(last.takenAt)}</dd>
-                  <dt className="text-fg-muted">Bunny library</dt>
+                  <dt className="text-fg-secondary">Bunny library</dt>
                   <dd className="font-mono text-fg">{size(last.libraryBytes)} · {last.libraryVideos} videos</dd>
-                  <dt className="text-fg-muted">Counted by Orochia</dt>
+                  <dt className="text-fg-secondary">Counted by Orochia</dt>
                   <dd className="font-mono text-fg">{size(last.appBytes)}</dd>
-                  <dt className="text-fg-muted">Rows corrected</dt>
+                  <dt className="text-fg-secondary">Rows corrected</dt>
                   <dd className="font-mono text-fg">{last.updatedRows}</dd>
-                  <dt className="text-fg-muted">Missing at Bunny</dt>
+                  <dt className="text-fg-secondary">Missing at Bunny</dt>
                   <dd className="font-mono text-fg">{last.missingVideos}</dd>
-                  <dt className="text-fg-muted">Orphans</dt>
+                  <dt className="text-fg-secondary">Orphans</dt>
                   <dd className="font-mono text-fg">{last.orphanVideos} · {size(last.orphanBytes)}</dd>
                   {last.zoneBytes !== null && (
                     <>
-                      <dt className="text-fg-muted">Storage zone</dt>
+                      <dt className="text-fg-secondary">Storage zone</dt>
                       <dd className="font-mono text-fg">{size(last.zoneBytes)} · {last.zoneFiles ?? "?"} files</dd>
                     </>
                   )}
@@ -249,24 +249,24 @@ export default async function StoragePage() {
 
           <section aria-labelledby="limits-title">
             <h2 id="limits-title" className="mb-3 flex items-center gap-2 text-sm font-bold text-fg">
-              <ShieldCheck className="h-4 w-4 text-accent" aria-hidden /> Limits & defences
+              <ShieldCheck className="h-4 w-4 text-fg-accent" aria-hidden /> Limits & defences
             </h2>
             <Panel>
               <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
-                <dt className="text-fg-muted">Plans</dt>
+                <dt className="text-fg-secondary">Plans</dt>
                 <dd className="font-mono text-fg">{planChoices.map((o) => o.label).join(" · ")}</dd>
-                <dt className="text-fg-muted">Owner (ADMIN)</dt>
+                <dt className="text-fg-secondary">Owner (ADMIN)</dt>
                 <dd className="font-mono text-fg">{s.adminPlan}</dd>
-                <dt className="text-fg-muted">Per file</dt>
+                <dt className="text-fg-secondary">Per file</dt>
                 <dd className="font-mono text-fg">video {size(s.perFile.video.maxBytes)} · story {size(s.perFile.story.maxBytes)} · draft {size(s.perFile.draft.maxBytes)}</dd>
-                <dt className="text-fg-muted">Uploads</dt>
+                <dt className="text-fg-secondary">Uploads</dt>
                 <dd className="font-mono text-fg">{s.uploadsPerDay ?? "∞"} / day · {s.concurrentUploads ?? "∞"} at once · {s.imageUploadsPerDay ?? "∞"} pictures / day</dd>
-                <dt className="text-fg-muted">Rate limits</dt>
-                <dd className={cn("font-mono", defences.rateLimitStore === "postgres" ? "text-success" : "text-warning")}>
+                <dt className="text-fg-secondary">Rate limits</dt>
+                <dd className={cn("font-mono", defences.rateLimitStore === "postgres" ? "text-fg-success" : "text-fg-warning")}>
                   {defences.rateLimitStore}{defences.rateLimitStore === "memory" ? " — one instance only" : " — shared"}
                 </dd>
-                <dt className="text-fg-muted">Bot challenge</dt>
-                <dd className={cn("font-mono", challenge.startsWith("on") ? "text-success" : "text-warning")}>{challenge}</dd>
+                <dt className="text-fg-secondary">Bot challenge</dt>
+                <dd className={cn("font-mono", challenge.startsWith("on") ? "text-fg-success" : "text-fg-warning")}>{challenge}</dd>
               </dl>
             </Panel>
           </section>
