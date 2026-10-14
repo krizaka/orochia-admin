@@ -17,6 +17,16 @@ jobs:
   build-and-lint:
     name: Lint · Typecheck · Build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: orochia_user
+          POSTGRES_PASSWORD: orochia_secret
+          POSTGRES_DB: orochia_admin
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -26,7 +36,11 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx tsc --noEmit
-      - run: npm test
+      - name: Unit tests, and the pool through a database that drops its connections
+        run: npm test
+        env:
+          DATABASE_RECONNECT_IT: "1"
+          DATABASE_URL: postgresql://orochia_user:orochia_secret@localhost:5432/orochia_admin
       - run: npm run build
         env:
           OPERATOR_API_URL: http://localhost:3000
