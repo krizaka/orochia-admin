@@ -2,7 +2,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-// @ts-expect-error -- the shared guard is plain JavaScript
 import { auditRobots } from "../scripts/check-seo-family.mjs";
 import robots from "../app/robots";
 
