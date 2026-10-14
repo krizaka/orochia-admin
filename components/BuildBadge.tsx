@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@krizaka/ui/badge";
+import { NavBar } from "@krizaka/ui/nav-bar";
 import { Tooltip } from "@krizaka/ui/tooltip";
 
 import { BUILD_INFO, type BuildInfo, buildUrl, showsBuildBadge } from "@/lib/build-info";
@@ -11,7 +11,11 @@ const NOTICE = {
   other: "Development build — still being tested, not production-ready",
 };
 
-/** The build in the header — `v1.0.0 · dev · a1b2c3d`, linking its commit — on every environment but production. */
+/**
+ * The environment in the header (NAV-SYS: @krizaka/ui's `NavBar.Badge`, `dev`) on every environment but production; the
+ * version and the commit (`v1.0.0 · dev · a1b2c3d`) stay in its accessible name, and it links the commit. A private
+ * console: no family switcher, no family footer.
+ */
 export function BuildBadge({ info = BUILD_INFO }: { info?: BuildInfo }) {
   if (!showsBuildBadge(info)) return null;
   const label = [`v${info.version}`, info.env, info.sha].filter(Boolean).join(" · ");
@@ -26,9 +30,7 @@ export function BuildBadge({ info = BUILD_INFO }: { info?: BuildInfo }) {
         data-testid="build-badge"
         className="inline-flex shrink-0 rounded-full focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <Badge tone="warning" className="font-mono normal-case tracking-normal transition-colors hover:bg-warning/25">
-          {label}
-        </Badge>
+        <NavBar.Badge env={info.env} className="inline-flex" />
       </a>
     </Tooltip>
   );
