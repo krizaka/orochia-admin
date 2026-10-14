@@ -44,11 +44,66 @@ function config(url: string): PoolConfig {
 
 const holder = globalThis as unknown as { __adminPool?: Pool; __adminReady?: Promise<void> };
 
-function pool(): Pool {
+/** A query that gets no answer for this long is abandoned and its connection destroyed (a peer that vanished sends nothing). */
+export const QUERY_TIMEOUT_MS = 30_000;
+
+const UNAVAILABLE_CODES = new Set(["53300", "53400", "57P01", "57P02", "57P03", "08000", "08001", "08003", "08004", "08006", "ECONNREFUSED", "ECONNRESET", "ECONNABORTED", "EPIPE", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN", "EHOSTUNREACH", "ENETUNREACH"]);
+const LOST_MESSAGE = /timeout exceeded when trying to connect|Connection terminated|Query read timeout|Client has encountered a connection error|Connection ended unexpectedly|terminating connection|server closed the connection/i;
+
+/** True when the error means the database is unreachable or the connection died — not that the query is wrong. */
+export function isDatabaseUnavailable(error: unknown): boolean {
+  for (let current: unknown = error, depth = 0; current && depth < 5; depth++) {
+    const { code, message, cause } = current as { code?: unknown; message?: unknown; cause?: unknown };
+    if (typeof code === "string" && UNAVAILABLE_CODES.has(code)) return true;
+    if (typeof message === "string" && LOST_MESSAGE.test(message)) return true;
+    current = cause;
+  }
+  return false;
+}
+
+/** The statement without the whitespace and SQL comments before it (a linear scan). */
+function skipLeadingComments(text: string): string {
+  let i = 0;
+  for (;;) {
+    while (i < text.length && /\s/.test(text[i])) i++;
+    if (text.startsWith("--", i)) {
+      const end = text.indexOf("\n", i);
+      i = end === -1 ? text.length : end + 1;
+    } else if (text.startsWith("/*", i)) {
+      const end = text.indexOf("*/", i + 2);
+      i = end === -1 ? text.length : end + 2;
+    } else return text.slice(i);
+  }
+}
+
+/** A plain read — safe to replay once when its connection died. Writes, CTEs, locks and side-effect functions never are. */
+export function isIdempotentRead(text: unknown): boolean {
+  if (typeof text !== "string") return false;
+  const statement = skipLeadingComments(text);
+  if (!/^(select|show)\b/i.test(statement)) return false;
+  return !/\bfor\s+(no\s+key\s+)?(update|share|key\s+share)\b|\b(nextval|setval|pg_notify|pg_advisory\w*)\s*\(|\binto\s+\w/i.test(statement);
+}
+
+/** The process-wide pool (one per process, kept on globalThis). */
+export function pool(): Pool {
   if (!holder.__adminPool) {
     const url = process.env.DATABASE_URL?.trim();
     if (!url && process.env.NODE_ENV === "production") throw new Error("DATABASE_URL is required in production");
-    holder.__adminPool = new Pool({ ...config(url || "postgresql://orochia_user:orochia_secret@localhost:5432/orochia_admin?sslmode=disable"), max: 5 });
+    const created = new Pool({
+      ...config(url || "postgresql://orochia_user:orochia_secret@localhost:5432/orochia_admin?sslmode=disable"),
+      max: 5,
+      // The database may restart or fail over under a running console (managed PostgreSQL does): idle connections go
+      // back quickly, TCP keep-alive and the query timeout notice a peer that vanished, no connection outlives 30 min.
+      idleTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 5_000,
+      keepAlive: true,
+      keepAliveInitialDelayMillis: 10_000,
+      query_timeout: QUERY_TIMEOUT_MS,
+      maxLifetimeSeconds: 1_800,
+    });
+    // An idle connection dropped by the server must not crash the process: the pool discards it and opens another.
+    created.on("error", (error) => console.error(`[db] idle connection error: ${error.message}`));
+    holder.__adminPool = created;
   }
   return holder.__adminPool;
 }
@@ -63,5 +118,20 @@ export async function sql<T extends Record<string, unknown> = Record<string, unk
       throw error;
     });
   await holder.__adminReady;
-  return (await pool().query<T>(text, params)).rows;
+  try {
+    return (await pool().query<T>(text, params)).rows;
+  } catch (error) {
+    // A read whose connection died is replayed once on a fresh one; a write never is — it may have been applied.
+    if (!isDatabaseUnavailable(error) || !isIdempotentRead(text)) throw error;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    return (await pool().query<T>(text, params)).rows;
+  }
+}
+
+/** Ends the pool (tests, graceful shutdown); the next query opens a new one. */
+export async function closeDb(): Promise<void> {
+  const current = holder.__adminPool;
+  holder.__adminPool = undefined;
+  holder.__adminReady = undefined;
+  await current?.end();
 }
