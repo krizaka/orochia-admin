@@ -21,8 +21,9 @@ function allowed(ip: string | null): boolean {
 }
 
 export function proxy(req: NextRequest) {
-  // The platform's health check comes from inside its network; the route answers "ok" and nothing else.
-  if (req.nextUrl.pathname === "/api/health") return NextResponse.next();
+  // The platform's health check comes from inside its network; the route answers "ok" and nothing else. robots.txt is
+  // public on purpose (`Disallow: /`, no data): a crawler must be able to read that the console is not to be indexed.
+  if (req.nextUrl.pathname === "/api/health" || req.nextUrl.pathname === "/robots.txt") return NextResponse.next();
   if (!allowed(clientIp(req))) return new NextResponse("Forbidden", { status: 403 });
   const { pathname } = req.nextUrl;
   if (pathname.startsWith("/login") || pathname.startsWith("/api/session")) return NextResponse.next();
