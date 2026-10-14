@@ -2,6 +2,7 @@
   "name": "@krizaka/orochia-admin",
   "version": "1.0.0",
   "private": true,
+  "engines": { "node": ">=22" },
   "description": "Operator console for Orochia: 2257 creator verification, content reports, payouts and treasury",
   "scripts": {
     "dev": "next dev -p 3001",
