@@ -39,6 +39,7 @@ services:
       - key: AUTH_OPERATOR_PASSWORD
         scope: RUN_TIME
         type: SECRET
+        type: SECRET
       # Orochia's API and the service token shared with it (OPERATOR_API_TOKEN on orochia-dev).
       - key: OPERATOR_API_URL
         scope: RUN_TIME
