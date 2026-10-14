@@ -3,6 +3,9 @@
 # Secret values are entered in the app (Settings → Environment Variables), never here.
 name: orochia-admin-dev
 region: tor
+domains:
+  - domain: admin.orochia.com
+    type: PRIMARY
 services:
   - name: admin
     github:
