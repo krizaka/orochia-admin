@@ -1,9 +1,10 @@
 // The operator console is never indexed (the Krizaka family contract, scripts/check-seo-family.mjs).
 import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
-import { auditRobots } from "../scripts/check-seo-family.mjs";
 import robots from "../app/robots";
+import { auditRobots } from "../scripts/check-seo-family.mjs";
 
 const read = (p: string) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 
