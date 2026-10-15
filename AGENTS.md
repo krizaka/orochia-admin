@@ -22,7 +22,7 @@
   role) · storage & abuse (platform usage against its cap, largest accounts and their storage plans, reconciliation with
   Bunny, rate-limit store and bot challenge) · Explorer on Orazaka (the proof of use: engine host, public videos with a vector,
   each call to Orazaka with the run id it answered — counts and ids only) · platform & database (environment, migration history, rows per table,
-  backups, factory reset).
+  backups, factory reset) · **operations** (dependencies up/degraded/down, queues — videos encoding/held/failed, reports, verifications, payouts — the console's pool and connections against their budget, what is deployed) · **audit log** (the operator log as a sortable, filterable, exportable table).
 - Desktop is the target: tables and dialogs are laid out for a wide screen.
 
 ## 2. Rules

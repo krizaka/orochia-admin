@@ -10,7 +10,8 @@
     "start": "next start -p 3001",
     "lint": "eslint . && krizaka-ratchet",
     "test": "vitest run",
-    "docs:generate": "UPDATE_DOCS=1 vitest run lib/env.test.ts"
+    "docs:generate": "UPDATE_DOCS=1 vitest run lib/env.test.ts",
+    "e2e": "node e2e/walk.mjs"
   },
   "dependencies": {
     "@krizaka/charts": "^0.1.0",
@@ -34,6 +35,7 @@
     "@types/react-dom": "^19.2.0",
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.4.0",
+    "playwright-core": "^1.64.0",
     "postcss": "^8.4.41",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.5.4",

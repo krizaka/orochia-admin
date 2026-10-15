@@ -8,8 +8,10 @@ import {
   AlertTriangle,
   Database,
   ExternalLink,
+  Gauge,
   Gavel,
   HardDrive,
+  History,
   LayoutDashboard,
   ShieldCheck,
   Sparkles,
@@ -35,6 +37,8 @@ export function AdminSidebar() {
     { label: "Accounts", href: "/users", icon: UserCog },
     { label: "Storage & Abuse", href: "/storage", icon: HardDrive },
     { label: "Explorer on Orazaka", href: "/explorer", icon: Sparkles },
+    { label: "Operations", href: "/operations", icon: Gauge },
+    { label: "Audit log", href: "/audit", icon: History },
     { label: "Platform & Database", href: "/platform", icon: Database },
   ];
 
