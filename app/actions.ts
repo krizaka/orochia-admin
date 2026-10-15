@@ -71,6 +71,13 @@ export async function manageUser(_: ActionState, form: FormData) {
   }, { action: action === "set-role" ? `role → ${text(form, "role")}` : `account ${action}`, target: text(form, "id"), detail: text(form, "reason") });
 }
 
+/** Ends every session of an account (a lost phone) without suspending it: the person signs in again. */
+export async function endUserSessions(_: ActionState, form: FormData) {
+  return attempt(["/users"], async () => {
+    await orochia(`/api/admin/users/${text(form, "id")}/sessions`, { method: "DELETE" });
+  }, { action: "sessions ended", target: text(form, "id") });
+}
+
 /** Cancels an auction with a recorded reason; the leading bid's credits go back to its bidder. */
 export async function cancelAuction(_: ActionState, form: FormData) {
   return attempt(["/auctions", "/"], async () => {
