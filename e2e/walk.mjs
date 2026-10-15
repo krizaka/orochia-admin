@@ -1,6 +1,6 @@
 // End-to-end walk of the console: sign in as the operator from an allowed address, open every screen, and check that an
 // address outside AUTH_ALLOWED_IPS is refused. Needs a PostgreSQL for the console's own database (DATABASE_URL) and a
-// Chromium for playwright-core. Run: `DATABASE_URL=… npm run e2e` (screenshots, dark, in $E2E_SHOTS when set).
+// Chromium for playwright-core. Run: `DATABASE_URL=… npm run e2e` (screenshots, dark, with `--shots <dir>`).
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -8,6 +8,7 @@ import { mkdirSync } from "node:fs";
 import { startMockPlatform } from "./mock-platform.mjs";
 
 const { chromium } = await import("playwright-core");
+const shots = process.argv.includes("--shots") ? process.argv[process.argv.indexOf("--shots") + 1] : null;
 const PLATFORM = 4189;
 const APP = 4102;
 const BASE = `http://localhost:${APP}`;
@@ -61,12 +62,12 @@ try {
   await page.waitForURL(`${BASE}/`, { timeout: 90_000 });
   check(true, "the operator signs in from an allowed address");
 
-  if (process.env.E2E_SHOTS) mkdirSync(process.env.E2E_SHOTS, { recursive: true });
+  if (shots) mkdirSync(shots, { recursive: true });
   for (const [path, text] of SCREENS) {
     const res = await page.goto(`${BASE}${path}`, { waitUntil: "networkidle" });
     const ok = res?.status() === 200 && (text ? await page.getByText(text).first().isVisible() : (await page.locator("main").count()) > 0);
     check(ok, `${path} renders${text ? ` "${text}"` : ""}`);
-    if (process.env.E2E_SHOTS) await page.screenshot({ path: `${process.env.E2E_SHOTS}/${path.slice(1) || "overview"}.png` });
+    if (shots) await page.screenshot({ path: `${shots}/${path.slice(1) || "overview"}.png` });
   }
   await page.goto(`${BASE}/operations`, { waitUntil: "networkidle" });
   check(await page.getByText("Videos failed").first().isVisible(), "/operations lists the queues");
