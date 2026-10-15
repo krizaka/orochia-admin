@@ -135,3 +135,23 @@ export async function closeDb(): Promise<void> {
   holder.__adminReady = undefined;
   await current?.end();
 }
+
+export interface DbBudget {
+  pool: { max: number; total: number; idle: number; waiting: number };
+  /** Connections open on the console's database, and what its role may open. */
+  open: number;
+  limit: number;
+}
+
+/** The console's pool and the database's connections against the role's budget (a small managed cluster has few). */
+export async function dbBudget(): Promise<DbBudget> {
+  const p = pool();
+  const [row] = await sql<{ open: string; role_limit: number; server_limit: string }>(
+    `SELECT (SELECT count(*) FROM pg_stat_activity WHERE datname = current_database()) AS open,
+            (SELECT rolconnlimit FROM pg_roles WHERE rolname = current_user) AS role_limit,
+            current_setting('max_connections') AS server_limit`,
+  );
+  const roleLimit = Number(row?.role_limit ?? -1);
+  const serverLimit = Number(row?.server_limit ?? 0);
+  return { pool: { max: p.options.max ?? 10, total: p.totalCount, idle: p.idleCount, waiting: p.waitingCount }, open: Number(row?.open ?? 0), limit: roleLimit > 0 ? Math.min(roleLimit, serverLimit || roleLimit) : serverLimit };
+}
