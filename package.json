@@ -2,7 +2,9 @@
   "name": "@krizaka/orochia-admin",
   "version": "1.0.0",
   "private": true,
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "description": "Operator console for Orochia: 2257 creator verification, content reports, payouts and treasury",
   "scripts": {
     "dev": "next dev -p 3001",
@@ -16,9 +18,9 @@
   "dependencies": {
     "@krizaka/charts": "^0.1.0",
     "@krizaka/orochia-design-system": "^4.1.1",
-    "@krizaka/tailwind": "^3.10.0",
-    "@krizaka/tokens": "^3.10.0",
-    "@krizaka/ui": "^3.10.0",
+    "@krizaka/tailwind": "^3.18.0",
+    "@krizaka/tokens": "^3.18.0",
+    "@krizaka/ui": "^3.18.0",
     "lucide-react": "^1.55.0",
     "next": "^16.4.0",
     "pg": "^8.23.1",
