@@ -7,7 +7,7 @@ export interface OperationsInput {
   platformHealth: { status: string; services?: Record<string, string>; version?: string; commit?: string } | null;
   overview: { catalogue: { videosByStatus: Record<string, number> }; queues: { openReports: number; creatorsAwaitingVerification: number; payoutsInProgress: number } } | null;
   storage: { enabled: boolean; platform: { level: string; percent: number | null }; lastReconciliation: { missingVideos: number; orphanVideos: number } | null } | null;
-  platform: { history: { kind: string; pending: number } } | null;
+  platform: { history: { kind: string; pending: number }; connections?: { pool: { max: number; total: number; idle: number; waiting: number }; open: number; limit: number } } | null;
 }
 
 export interface Dependency {
