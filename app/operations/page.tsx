@@ -17,7 +17,6 @@ const QUEUE = {
   payouts: "Payouts in progress",
   missing: "Videos missing at Bunny (last reconciliation)",
 } as const;
-const TONE = { up: "success", degraded: "warning", down: "danger" } as const;
 
 /** Each source is read on its own: a source that does not answer is said down, the rest is still shown. */
 async function read<T>(run: () => Promise<T>): Promise<T | null> {
@@ -30,7 +29,7 @@ async function read<T>(run: () => Promise<T>): Promise<T | null> {
 
 /** Operations: dependencies, queues, the console's own pool against its budget, and what is deployed. */
 export default async function OperationsPage() {
-  const [platformHealth, overview, storage, platform, budget] = await Promise.all([
+  const [platformHealth, overview, storage, platform] = await Promise.all([
     read(async () => {
       const res = await fetch(`${apiBaseUrl()}/api/health`, { cache: "no-store", signal: AbortSignal.timeout(5000) });
       return (await res.json()) as NonNullable<OperationsInput["platformHealth"]>;
@@ -38,8 +37,9 @@ export default async function OperationsPage() {
     read(async () => (await orochia<{ data: NonNullable<OperationsInput["overview"]> }>("/api/admin/overview")).data),
     read(async () => (await orochia<{ storage: NonNullable<OperationsInput["storage"]> }>("/api/admin/storage?top=1")).storage),
     read(async () => (await orochia<{ platform: NonNullable<OperationsInput["platform"]> }>("/api/admin/platform")).platform),
-    read(dbBudget),
   ]);
+  // Read after the others: the pool is measured while it is quiet, not while this page's own reads hold its connections.
+  const budget = await read(dbBudget);
   const deps = dependencies({ platformHealth, overview, storage, platform });
   const work = queues({ platformHealth, overview, storage, platform });
 
@@ -82,6 +82,20 @@ export default async function OperationsPage() {
               </div>
             ) : (
               <Empty>The console&apos;s database did not answer.</Empty>
+            )}
+          </Panel>
+        </section>
+        <section aria-labelledby="platform-db-title">
+          <h2 id="platform-db-title" className="mb-3 text-sm font-bold text-fg">Orochia&apos;s database</h2>
+          <Panel>
+            {platform?.connections ? (
+              <div className="flex flex-col gap-3">
+                <Meter showLabel thresholds={{ low: 0.7, high: 0.9 }} label={`Pool: ${platform.connections.pool.total - platform.connections.pool.idle} busy of ${platform.connections.pool.max} (${platform.connections.pool.total} open)`} value={share(platform.connections.pool.total - platform.connections.pool.idle, platform.connections.pool.max)} max={1} />
+                <Meter showLabel thresholds={{ low: 0.7, high: 0.9 }} label={`Connections on the database: ${platform.connections.open} of ${platform.connections.limit}`} value={share(platform.connections.open, platform.connections.limit)} max={1} />
+                <p className="text-xs text-fg-secondary">{platform.connections.pool.waiting} waiting.</p>
+              </div>
+            ) : (
+              <Empty>This Orochia release does not report its connections yet.</Empty>
             )}
           </Panel>
         </section>
