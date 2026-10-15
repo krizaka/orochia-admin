@@ -29,6 +29,12 @@ export function startMockPlatform(port) {
         res.writeHead(401, { "Content-Type": "application/json" });
         return res.end("{}");
       }
+      const user = /^\/api\/admin\/users\/([0-9a-f-]{36})\/(sessions|export)$/.exec(path);
+      if (user) {
+        const ok = user[2] === "sessions" ? req.method === "DELETE" : req.method === "GET";
+        res.writeHead(ok ? 200 : 405, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify(ok ? (user[2] === "sessions" ? { success: true } : { success: true, export: { format: "orochia-account-export/1", account: { id: user[1], username: "eric" } } }) : {}));
+      }
       const route = routes[path];
       res.writeHead(route ? 200 : 404, { "Content-Type": "application/json" });
       res.end(JSON.stringify(route ? route() : {}));

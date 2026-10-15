@@ -19,7 +19,7 @@
   (client address from App Platform's `do-connecting-ip`). In production an empty list lets nobody in.
 - Screens: overview · 2257 creator verification · content reports · catalogue (takedown / restore) · auctions
   (status, money held, cancel with a reason) · treasury & payouts · creator registry · accounts (suspend / reinstate /
-  role) · storage & abuse (platform usage against its cap, largest accounts and their storage plans, reconciliation with
+  role / end every session / Law 25 export) · storage & abuse (platform usage against its cap, largest accounts and their storage plans, reconciliation with
   Bunny, rate-limit store and bot challenge) · Explorer on Orazaka (the proof of use: engine host, public videos with a vector,
   each call to Orazaka with the run id it answered — counts and ids only) · platform & database (environment, migration history, rows per table,
   backups, factory reset) · **operations** (dependencies up/degraded/down, queues — videos encoding/held/failed, reports, verifications, payouts — the console's pool and connections against their budget, what is deployed) · **audit log** (the operator log as a sortable, filterable, exportable table).

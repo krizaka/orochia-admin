@@ -1,4 +1,4 @@
-import { manageUser } from "@/app/actions";
+import { endUserSessions, manageUser } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { button, cn, Empty, filter, PageTitle, Panel, td, th } from "@/components/ui";
 import { day,orochia } from "@/lib/orochia";
@@ -94,7 +94,19 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
                   <td className={td}>
                     {u.suspendedAt ? <span className="text-fg-danger">suspended — {u.suspensionReason}</span> : <span className="text-fg-success">active</span>}
                   </td>
-                  <td className={td}>
+                  <td className={cn(td, "flex flex-wrap items-start gap-2")}>
+                    <ConfirmDialog
+                      action={endUserSessions}
+                      fields={{ id: u.id }}
+                      trigger={{ label: "End sessions" }}
+                      tone="primary"
+                      title={`End every session of @${u.username}`}
+                      description={<>Every open session, on the web and in the app, stops working on its next request. The account stays active: they sign in again. Use it for a lost phone or a doubt.</>}
+                      confirmLabel="End every session"
+                    />
+                    <a className={button} href={`/api/users/${u.id}/export`} download>
+                      Export (Law 25)
+                    </a>
                     {u.suspendedAt ? (
                       <ConfirmDialog
                         action={manageUser}

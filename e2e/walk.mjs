@@ -73,6 +73,18 @@ try {
   check(await page.getByText("Videos failed").first().isVisible(), "/operations lists the queues");
   await page.goto(`${BASE}/audit`, { waitUntil: "networkidle" });
   check(await page.getByText("sign-in", { exact: true }).first().isVisible().catch(() => false), "/audit lists the operator's own sign-in");
+  // Accounts: end every session (a confirmed dialog), and the Law 25 export download.
+  await page.goto(`${BASE}/users`, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "End sessions" }).first().click();
+  await page.getByRole("button", { name: "End every session" }).click();
+  await page.waitForTimeout(1500);
+  await page.goto(`${BASE}/audit`, { waitUntil: "networkidle" });
+  check(await page.getByText("sessions ended").first().isVisible().catch(() => false), "ending the sessions of an account is in the audit log");
+  const exported = await context.request.get(`${BASE}/api/users/a1b2c3d4-0000-4000-8000-000000000001/export`);
+  const doc = await exported.json().catch(() => ({}));
+  check(exported.ok() && doc.format === "orochia-account-export/1", "the Law 25 export downloads as JSON");
+  await page.goto(`${BASE}/audit`, { waitUntil: "networkidle" });
+  check(await page.getByText("account exported").first().isVisible().catch(() => false), "the export is in the audit log");
   await browser.close();
 } finally {
   app.kill("SIGTERM");
