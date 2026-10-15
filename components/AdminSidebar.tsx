@@ -12,6 +12,7 @@ import {
   HardDrive,
   LayoutDashboard,
   ShieldCheck,
+  Sparkles,
   UserCog,
   Users,
   Wallet,
@@ -33,6 +34,7 @@ export function AdminSidebar() {
     { label: "Creator Registry", href: "/creators", icon: Users },
     { label: "Accounts", href: "/users", icon: UserCog },
     { label: "Storage & Abuse", href: "/storage", icon: HardDrive },
+    { label: "Explorer on Orazaka", href: "/explorer", icon: Sparkles },
     { label: "Platform & Database", href: "/platform", icon: Database },
   ];
 

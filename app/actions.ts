@@ -112,6 +112,17 @@ export async function reconcileStorage(_: ActionState) {
   }, { action: "storage reconciled with Bunny" });
 }
 
+/** Embeds the public videos that have no vector yet, through Orazaka (the scheduler does it every ten minutes). */
+export async function syncExplorer(_: ActionState) {
+  return attempt(["/explorer"], async () => {
+    const { data } = await orochia<{ data: { summary: { configured: boolean; candidates: number; embedded: number; unchanged: number; failure: string | null } } }>("/api/admin/explorer/sync", { method: "POST" });
+    const s = data.summary;
+    if (!s.configured) throw new ApiError(409, "Orazaka is not configured on Orochia (AI_ENGINE_URL, AI_ENGINE_API_KEY).");
+    if (s.failure) throw new ApiError(502, `Orazaka did not answer (${s.failure}); ${s.embedded} video(s) were indexed before it stopped.`);
+    return `Indexed ${s.embedded} video${s.embedded === 1 ? "" : "s"} through Orazaka${s.unchanged ? `, ${s.unchanged} unchanged` : ""}.`;
+  }, { action: "explorer indexed through Orazaka" });
+}
+
 /** Gives an account a storage plan of QUOTA_PLANS ("default" = the role's default); its held uploads go online if they fit. */
 export async function setStoragePlan(_: ActionState, form: FormData) {
   const plan = text(form, "plan");
