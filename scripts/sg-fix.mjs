@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console -- a command-line tool: its output is the interface */
 // The codemods: applies the `fix:` of the ast-grep rules (rules/*.yml) — hand-written time arithmetic → date-fns —
 // then adds the date-fns import to each file that now uses one. Behaviour is identical; run the tests after.
 //   node scripts/sg-fix.mjs [paths…]     (default: the whole repository)

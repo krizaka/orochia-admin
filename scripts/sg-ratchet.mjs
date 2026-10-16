@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console -- a command-line tool: its output is the interface */
 // The ast-grep ratchet: runs `ast-grep scan` (rules/, sgconfig.yml), counts the violations per rule and refuses any
 // increase against sg-ratchet.json. The counts only go down.
 //   node scripts/sg-ratchet.mjs            check (CI, npm run lint)
