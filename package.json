@@ -10,10 +10,14 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "eslint . && krizaka-ratchet",
+    "lint": "eslint . && krizaka-ratchet && ast-grep test --skip-snapshot-tests && node scripts/sg-ratchet.mjs",
     "test": "vitest run",
     "docs:generate": "UPDATE_DOCS=1 vitest run lib/env.test.ts",
-    "e2e": "node e2e/walk.mjs"
+    "e2e": "node e2e/walk.mjs",
+    "lint:sg": "node scripts/sg-ratchet.mjs",
+    "lint:sg:test": "ast-grep test --skip-snapshot-tests",
+    "sg:ratchet:update": "node scripts/sg-ratchet.mjs --update",
+    "sg:fix": "node scripts/sg-fix.mjs"
   },
   "dependencies": {
     "@krizaka/charts": "^0.1.0",
@@ -29,6 +33,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@ast-grep/cli": "0.51.0",
     "@krizaka/config": "^0.1.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.19.2",
