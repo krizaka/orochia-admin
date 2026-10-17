@@ -2,9 +2,10 @@ import { BarChart } from "@krizaka/charts/bar";
 import { Gauge } from "@krizaka/charts/gauge";
 import { HardDrive, RefreshCw, ShieldCheck, Users } from "lucide-react";
 
-import { reconcileStorage, setStoragePlan } from "@/app/actions";
+import { reconcileStorage } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { cn, Empty, PageTitle, Panel, Stat, strong, td, th, type Tone } from "@/components/ui";
+import { StorageAccountsTable } from "@/components/tables";
+import { cn, Empty, PageTitle, Panel, Stat, type Tone } from "@/components/ui";
 import { orochia } from "@/lib/orochia";
 
 type Level = "ok" | "warning" | "critical" | "full" | "unlimited";
@@ -166,51 +167,7 @@ export default async function StoragePage() {
           {s.topCreators.length === 0 ? (
             <Empty>Nobody keeps anything at Bunny yet.</Empty>
           ) : (
-            <Panel>
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th className={th}>Account</th>
-                    <th className={th}>Plan</th>
-                    <th className={th}>Used</th>
-                    <th className={th}>Video time</th>
-                    <th className={th}>Held</th>
-                    <th className={th}>Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-subtle">
-                  {s.topCreators.map((c) => (
-                    <tr key={c.id}>
-                      <td className={td}>
-                        <span className={strong}>{c.displayName ?? c.username}</span>
-                        <span className="block font-mono text-[11px] text-fg-secondary">@{c.username} · {c.role.toLowerCase()}</span>
-                      </td>
-                      <td className={cn(td, "font-mono")}>{c.plan}</td>
-                      <td className={cn(td, "whitespace-nowrap font-mono")}>
-                        {size(c.usedBytes)}
-                        <span className={cn("block text-[11px]", c.percent !== null && c.percent >= 95 ? "text-fg-danger" : c.percent !== null && c.percent >= 80 ? "text-fg-warning" : "text-fg-secondary")}>
-                          {c.limitBytes === null ? "no limit" : `of ${size(c.limitBytes)} · ${c.percent} %`}
-                        </span>
-                      </td>
-                      <td className={cn(td, "whitespace-nowrap font-mono")}>{minutes(c.usedSeconds)}</td>
-                      <td className={cn(td, c.held ? "font-semibold text-fg-warning" : "text-fg-secondary")}>{c.held || "—"}</td>
-                      <td className={td}>
-                        <ConfirmDialog
-                          action={setStoragePlan}
-                          fields={{ id: c.id }}
-                          trigger={{ label: "Change", tone: "secondary" }}
-                          tone="primary"
-                          title={`Storage plan of @${c.username}`}
-                          description={<>Sets how much this account may keep at Bunny. <span className="font-mono">default</span> is the role&apos;s plan; <span className="font-mono">unlimited</span> lifts the account&apos;s limit, never the platform&apos;s cap. Uploads held for want of space go online if they fit.</>}
-                          choice={{ name: "plan", label: "Plan", options: [{ value: "default", label: "default — the role's plan" }, ...planChoices.filter((o) => o.value !== "default")], defaultValue: c.plan }}
-                          confirmLabel="Set the plan"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Panel>
+            <StorageAccountsTable rows={s.topCreators} planChoices={planChoices} />
           )}
         </section>
 

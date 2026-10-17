@@ -49,9 +49,4 @@ export async function orochia<T>(path: string, init: RequestInit = {}): Promise<
 }
 
 export type { AdminIdentity } from "./account";
-
-export const money = (cents: number) =>
-  `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-export const day = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+export { day, money } from "./format";

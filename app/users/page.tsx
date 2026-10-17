@@ -1,7 +1,6 @@
-import { endUserSessions, manageUser } from "@/app/actions";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { button, cn, Empty, filter, PageTitle, Panel, td, th } from "@/components/ui";
-import { day,orochia } from "@/lib/orochia";
+import { AccountsTable } from "@/components/tables";
+import { button, Empty, filter, PageTitle } from "@/components/ui";
+import { orochia } from "@/lib/orochia";
 
 interface Account {
   id: string;
@@ -54,86 +53,7 @@ export default async function UsersPage(props: { searchParams: Promise<{ role?: 
       {users.length === 0 ? (
         <Empty>No account matches.</Empty>
       ) : (
-        <Panel>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className={th}>Account</th>
-                <th className={th}>Role</th>
-                <th className={th}>Checks</th>
-                <th className={th}>Joined</th>
-                <th className={th}>State</th>
-                <th className={th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle">
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td className={td}>
-                    <p className="font-semibold text-fg">{u.displayName}</p>
-                    <p className="font-mono text-[10px] text-fg-secondary">@{u.username} · {u.email}</p>
-                  </td>
-                  <td className={td}>
-                    <span className="mr-2 font-semibold text-fg">{u.role.toLowerCase()}</span>
-                    <ConfirmDialog
-                      action={manageUser}
-                      fields={{ id: u.id, action: "set-role" }}
-                      trigger={{ label: "Change" }}
-                      tone="primary"
-                      title={`Change the role of @${u.username}`}
-                      description={<>An administrator reaches this console and every operator action; a creator can publish once 2257-verified. The change applies on their next request.</>}
-                      choice={{ name: "role", label: "New role", defaultValue: u.role, options: [{ value: "MEMBER", label: "Member" }, { value: "CREATOR", label: "Creator" }, { value: "ADMIN", label: "Administrator" }] }}
-                      confirmLabel="Change the role"
-                    />
-                  </td>
-                  <td className={cn(td, "text-[11px]")}>
-                    <span className={u.isAgeVerified ? "text-fg-success" : "text-fg-secondary"}>18+</span>
-                    {u.role === "CREATOR" && <span className={cn("ml-2", u.isVerified ? "text-fg-success" : "text-fg-warning")}>2257 {u.isVerified ? "✓" : "pending"}</span>}
-                  </td>
-                  <td className={cn(td, "font-mono whitespace-nowrap")}>{day(u.createdAt)}</td>
-                  <td className={td}>
-                    {u.suspendedAt ? <span className="text-fg-danger">suspended — {u.suspensionReason}</span> : <span className="text-fg-success">active</span>}
-                  </td>
-                  <td className={cn(td, "flex flex-wrap items-start gap-2")}>
-                    <ConfirmDialog
-                      action={endUserSessions}
-                      fields={{ id: u.id }}
-                      trigger={{ label: "End sessions" }}
-                      tone="primary"
-                      title={`End every session of @${u.username}`}
-                      description={<>Every open session, on the web and in the app, stops working on its next request. The account stays active: they sign in again. Use it for a lost phone or a doubt.</>}
-                      confirmLabel="End every session"
-                    />
-                    <a className={button} href={`/api/users/${u.id}/export`} download>
-                      Export (Law 25)
-                    </a>
-                    {u.suspendedAt ? (
-                      <ConfirmDialog
-                        action={manageUser}
-                        fields={{ id: u.id, action: "reinstate" }}
-                        trigger={{ label: "Reinstate", tone: "primary" }}
-                        tone="primary"
-                        title={`Reinstate @${u.username}`}
-                        description={<>The account can sign in again and its listed videos come back. Auctions cancelled by the suspension stay cancelled.</>}
-                        confirmLabel="Reinstate"
-                      />
-                    ) : (
-                      <ConfirmDialog
-                        action={manageUser}
-                        fields={{ id: u.id, action: "suspend" }}
-                        trigger={{ label: "Suspend", tone: "danger" }}
-                        title={`Suspend @${u.username}`}
-                        description={<>They are signed out on their next request and can no longer sign in; their videos are no longer listed and their open auctions are cancelled, with every leading bid released.</>}
-                        reason={{ label: "Reason (recorded and shown to the account)", placeholder: "Terms violation: …" }}
-                        confirmLabel="Suspend the account"
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Panel>
+        <AccountsTable rows={users} />
       )}
     </div>
   );

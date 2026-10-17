@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 
 import { moderateConversation } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { cn, Empty, PageTitle, Panel, td } from "@/components/ui";
+import { ConversationMessagesTable } from "@/components/tables";
+import { Empty, PageTitle } from "@/components/ui";
 import { ApiError, orochia } from "@/lib/orochia";
 
 interface Context {
@@ -34,42 +35,7 @@ export default async function ConversationReport(props: { params: Promise<{ id: 
       {messages.length === 0 ? (
         <Empty>No message to show.</Empty>
       ) : (
-        <Panel>
-          <table className="w-full">
-            <tbody className="divide-y divide-border-subtle">
-              {messages.map((m) => (
-                <tr key={m.id} className={m.id === context.reportedMessageId ? "bg-danger/10" : undefined}>
-                  <td className={cn(td, "whitespace-nowrap font-mono")}>@{m.sender}</td>
-                  <td className={cn(td, "max-w-xl whitespace-pre-line")}>{m.content}</td>
-                  <td className={td}>
-                    <div className="flex flex-wrap gap-1.5">
-                      <ConfirmDialog
-                        action={moderateConversation}
-                        fields={{ conversationId: conversation.id, action: "remove_message", target: m.id }}
-                        trigger={{ label: "Remove", tone: "danger" }}
-                        title="Remove the message"
-                        description={<>The message disappears for everyone. The report keeps its copy of the text.</>}
-                        reason={{ label: "Reason (recorded)", placeholder: context.reason }}
-                        confirmLabel="Remove"
-                      />
-                      {group && m.id === context.reportedMessageId && (
-                        <ConfirmDialog
-                          action={moderateConversation}
-                          fields={{ conversationId: conversation.id, action: "remove_member", target: m.senderId }}
-                          trigger={{ label: `Remove @${m.sender} from the group`, tone: "danger" }}
-                          title="Remove the member"
-                          description={<>@{m.sender} leaves the group and stops receiving it.</>}
-                          reason={{ label: "Reason (recorded)", placeholder: context.reason }}
-                          confirmLabel="Remove from the group"
-                        />
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Panel>
+        <ConversationMessagesTable rows={messages} conversationId={conversation.id} group={group} reportedMessageId={context.reportedMessageId} reason={context.reason} />
       )}
       {group && !conversation.archivedAt && (
         <div className="mt-4">

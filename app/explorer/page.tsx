@@ -2,8 +2,9 @@ import { Activity, Cpu, RefreshCw } from "lucide-react";
 
 import { syncExplorer } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { cn, Empty, PageTitle, Panel, Stat, strong, td, th } from "@/components/ui";
-import { coverage, runStatus, shortRunId } from "@/lib/explorer-view";
+import { ExplorerRunsTable } from "@/components/tables";
+import { Empty, PageTitle, Panel, Stat } from "@/components/ui";
+import { coverage } from "@/lib/explorer-view";
 import { orochia } from "@/lib/orochia";
 
 interface ExplorerStatus {
@@ -60,39 +61,7 @@ export default async function ExplorerPage() {
           <Empty icon={<Cpu className="h-5 w-5" aria-hidden />}>{s.configured ? "No call yet — index the public videos, or run a search on Orochia." : "Orazaka is not configured: the Explorer is full-text search alone."}</Empty>
         ) : (
           <Panel>
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className={th}>When</th>
-                  <th className={th}>For</th>
-                  <th className={th}>Orazaka run id</th>
-                  <th className={th}>Model</th>
-                  <th className={th}>Texts</th>
-                  <th className={th}>Tokens</th>
-                  <th className={th}>Time</th>
-                  <th className={th}>Outcome</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {s.runs.map((r) => {
-                  const outcome = runStatus(r.status);
-                  return (
-                    <tr key={r.id}>
-                      <td className={cn(td, "whitespace-nowrap")}>{when(r.createdAt)}</td>
-                      <td className={td}>{r.kind === "INDEX" ? "Indexing videos" : "A search"}</td>
-                      <td className={cn(td, "font-mono")} title={r.orazakaRunId ?? undefined}>
-                        <span className={strong}>{shortRunId(r.orazakaRunId)}</span>
-                      </td>
-                      <td className={cn(td, "font-mono")}>{r.model ?? "—"}</td>
-                      <td className={cn(td, "font-mono")}>{r.inputs}</td>
-                      <td className={cn(td, "font-mono")}>{r.promptTokens || "—"}</td>
-                      <td className={cn(td, "whitespace-nowrap font-mono")}>{r.durationMs} ms</td>
-                      <td className={cn(td, "font-semibold", outcome.tone === "success" ? "text-fg-success" : outcome.tone === "warning" ? "text-fg-warning" : "text-fg-danger")}>{outcome.label}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <ExplorerRunsTable rows={s.runs} />
             <p className="mt-3 text-xs text-fg-secondary">
               The full run id is in the cell&apos;s tooltip and in Orazaka&apos;s logs (<span className="font-mono">embedding.run runId=…</span>). A failed call leaves no id: the search it belonged to was answered by full-text search alone.
             </p>

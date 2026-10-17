@@ -1,7 +1,6 @@
-import { moderateVideo } from "@/app/actions";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { button, cn, Empty, filter, PageTitle, Panel, Stat, td, th } from "@/components/ui";
-import { day,orochia } from "@/lib/orochia";
+import { CatalogueTable } from "@/components/tables";
+import { button, Empty, filter, PageTitle, Stat } from "@/components/ui";
+import { orochia } from "@/lib/orochia";
 
 interface Catalogue {
   videosByStatus: Record<string, number>;
@@ -64,63 +63,7 @@ export default async function CataloguePage(props: { searchParams: Promise<{ sta
       {videos.length === 0 ? (
         <Empty>No video matches.</Empty>
       ) : (
-        <Panel>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className={th}>Video</th>
-                <th className={th}>Creator</th>
-                <th className={th}>State</th>
-                <th className={th}>Reports</th>
-                <th className={th}>Views</th>
-                <th className={th}>Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle">
-              {videos.map((v) => (
-                <tr key={v.id}>
-                  <td className={td}>
-                    <a className="text-fg-accent hover:underline" href={`${appUrl}/watch/${v.id}`} target="_blank" rel="noreferrer">{v.title}</a>
-                    <p className="text-[10px] font-mono text-fg-secondary">{day(v.createdAt)} · {v.visibility.replace(/_/g, " ").toLowerCase()}</p>
-                  </td>
-                  <td className={cn(td, "font-mono")}>@{v.creatorUsername}</td>
-                  <td className={td}>
-                    {v.removedAt ? (
-                      <span className="text-fg-danger">taken down — {v.removalReason}</span>
-                    ) : (
-                      <span className={v.status === "READY" ? "text-fg-success" : "text-fg-secondary"}>{v.status.replace(/_/g, " ").toLowerCase()}</span>
-                    )}
-                  </td>
-                  <td className={cn(td, "font-mono", v.openReports > 0 ? "font-bold text-fg-danger" : "")}>{v.openReports}</td>
-                  <td className={cn(td, "font-mono")}>{v.viewsCount.toLocaleString("en-US")}</td>
-                  <td className={td}>
-                    {v.removedAt ? (
-                      <ConfirmDialog
-                        action={moderateVideo}
-                        fields={{ id: v.id, action: "restore" }}
-                        trigger={{ label: "Restore", tone: "primary" }}
-                        tone="primary"
-                        title="Restore the video"
-                        description={<>“{v.title}” is listed and playable again under its own audience rules. The takedown reason is cleared.</>}
-                        confirmLabel="Restore"
-                      />
-                    ) : (
-                      <ConfirmDialog
-                        action={moderateVideo}
-                        fields={{ id: v.id, action: "remove" }}
-                        trigger={{ label: "Take down", tone: "danger" }}
-                        title="Take the video down"
-                        description={<>“{v.title}” by @{v.creatorUsername} disappears everywhere and its playback is refused, for its author too. An open auction on it is cancelled and its bid released. Reversible from this screen.</>}
-                        reason={{ label: "Reason (recorded)", placeholder: "DMCA notice #…, terms violation, confirmed report…" }}
-                        confirmLabel="Take down"
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Panel>
+        <CatalogueTable rows={videos} appUrl={appUrl} />
       )}
     </div>
   );

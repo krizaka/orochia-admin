@@ -1,8 +1,10 @@
-import { Database, Download, HardDrive, History, RotateCcw, ShieldAlert, Trash2 } from "lucide-react";
+import { Database, HardDrive, History, RotateCcw, ShieldAlert } from "lucide-react";
 
-import { backupDatabase, deleteBackup, factoryReset } from "@/app/actions";
+import { backupDatabase, factoryReset } from "@/app/actions";
+import { AuditTable } from "@/components/AuditTable";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { button, cn, Empty, PageTitle, Panel, Stat, td, th } from "@/components/ui";
+import { BackupsTable } from "@/components/tables";
+import { cn, Empty, PageTitle, Panel, Stat } from "@/components/ui";
 import { recentAudit } from "@/lib/account";
 import { orochia } from "@/lib/orochia";
 
@@ -22,7 +24,6 @@ interface Backup {
 
 const size = (bytes: number) =>
   bytes >= 1024 ** 3 ? `${(bytes / 1024 ** 3).toFixed(2)} GB` : bytes >= 1024 ** 2 ? `${(bytes / 1024 ** 2).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`;
-const when = (iso: string) => new Date(iso).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 
 const HISTORY: Record<Platform["history"]["kind"], { label: string; tone: string; hint: string }> = {
   current: { label: "Up to date", tone: "text-fg-success", hint: "every migration of this release is applied" },
@@ -75,45 +76,7 @@ export default async function PlatformPage() {
           {backups.length === 0 ? (
             <Empty>No backup yet.</Empty>
           ) : (
-            <Panel>
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th className={th}>Taken</th>
-                    <th className={th}>File</th>
-                    <th className={th}>Size</th>
-                    <th className={th}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-subtle">
-                  {backups.map((b) => (
-                    <tr key={b.name}>
-                      <td className={cn(td, "whitespace-nowrap font-mono text-[11px]")}>{when(b.createdAt)}</td>
-                      <td className={cn(td, "max-w-[13rem] truncate font-mono text-[11px]")} title={b.name}>{b.name}</td>
-                      <td className={cn(td, "whitespace-nowrap font-mono")}>{size(b.sizeBytes)}</td>
-                      <td className={td}>
-                        <div className="flex gap-1.5">
-                          <a
-                            href={`/api/backups/${encodeURIComponent(b.name)}`}
-                            className={button}
-                          >
-                            <Download className="h-3.5 w-3.5" aria-hidden /> <span className="sr-only">Download </span>.gz
-                          </a>
-                          <ConfirmDialog
-                            action={deleteBackup}
-                            fields={{ name: b.name }}
-                            trigger={{ label: "", tone: "danger", icon: <Trash2 className="h-3.5 w-3.5" aria-label="Delete" /> }}
-                            title="Delete the backup"
-                            description={<>The file <span className="font-mono">{b.name}</span> is removed from storage for good. Download it first if you may need it.</>}
-                            confirmLabel="Delete"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </Panel>
+            <BackupsTable rows={backups} />
           )}
         </section>
 
@@ -144,30 +107,7 @@ export default async function PlatformPage() {
         {log.length === 0 ? (
           <Empty>Nothing logged yet.</Empty>
         ) : (
-          <Panel>
-            <table className="w-full">
-              <thead>
-                <tr>
-                  <th className={th}>When</th>
-                  <th className={th}>Action</th>
-                  <th className={th}>Target</th>
-                  <th className={th}>Outcome</th>
-                  <th className={th}>Detail</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-subtle">
-                {log.map((e, i) => (
-                  <tr key={i}>
-                    <td className={cn(td, "whitespace-nowrap font-mono")}>{when(new Date(e.at).toISOString())}</td>
-                    <td className={cn(td, "font-semibold text-fg")}>{e.action}</td>
-                    <td className={cn(td, "max-w-[12rem] truncate font-mono text-[11px]")} title={e.target ?? ""}>{e.target ?? "—"}</td>
-                    <td className={cn(td, e.ok ? "text-fg-success" : "text-fg-danger")}>{e.ok ? "done" : "refused"}</td>
-                    <td className={cn(td, "max-w-md truncate")} title={e.detail ?? ""}>{e.detail ?? ""}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Panel>
+          <AuditTable rows={log.map((e, i) => ({ id: `${new Date(e.at).getTime()}-${i}`, at: new Date(e.at).toISOString(), action: e.action, target: e.target, ok: e.ok, detail: e.detail }))} />
         )}
       </section>
 
