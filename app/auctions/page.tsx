@@ -1,7 +1,6 @@
-import { cancelAuction } from "@/app/actions";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { cn, Empty, filter, PageTitle, Panel, Stat, td, th } from "@/components/ui";
-import { day, money,orochia } from "@/lib/orochia";
+import { AuctionsTable } from "@/components/tables";
+import { Empty, filter, PageTitle, Stat } from "@/components/ui";
+import { money,orochia } from "@/lib/orochia";
 
 interface AdminAuction {
   id: string;
@@ -23,16 +22,7 @@ interface AdminAuction {
 
 const STATUSES = ["all", "OPEN", "AWAITING_DECISION", "SOLD", "DECLINED", "UNSOLD", "CANCELLED"] as const;
 const LABEL: Record<string, string> = { all: "All", OPEN: "Open", AWAITING_DECISION: "Awaiting decision", SOLD: "Sold", DECLINED: "Declined", UNSOLD: "No bids", CANCELLED: "Cancelled" };
-const TONE: Record<string, string> = {
-  OPEN: "text-fg-danger",
-  AWAITING_DECISION: "text-fg-warning",
-  SOLD: "text-fg-success",
-  DECLINED: "text-fg-secondary",
-  UNSOLD: "text-fg-secondary",
-  CANCELLED: "text-fg-secondary",
-};
 
-const when = (iso: string) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 
 export default async function AuctionsPage(props: { searchParams: Promise<{ status?: string }> }) {
   const { status: asked } = await props.searchParams;
@@ -78,75 +68,7 @@ export default async function AuctionsPage(props: { searchParams: Promise<{ stat
       {list.length === 0 ? (
         <Empty>No auction {status === "all" ? "yet" : `in “${LABEL[status]}”`}.</Empty>
       ) : (
-        <Panel>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className={th}>Video</th>
-                <th className={th}>Creator</th>
-                <th className={th}>Status</th>
-                <th className={th}>Price</th>
-                <th className={th}>Bids · leader</th>
-                <th className={th}>Window</th>
-                <th className={th}>Terms</th>
-                <th className={th}>Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-subtle">
-              {list.map((a) => (
-                <tr key={a.id}>
-                  <td className={td}>
-                    <a className="text-fg-accent hover:underline" href={`${appUrl}/watch/${a.videoId}#auction`} target="_blank" rel="noreferrer">
-                      {a.videoTitle}
-                    </a>
-                    {a.cancelReason && <p className="mt-0.5 text-[10px] text-fg-secondary">cancelled — {a.cancelReason}</p>}
-                  </td>
-                  <td className={cn(td, "font-mono")}>@{a.creatorUsername}</td>
-                  <td className={cn(td, "font-semibold", TONE[a.status])}>
-                    {LABEL[a.status]}
-                    {a.decisionDeadline && <p className="font-mono text-[10px] font-normal text-fg-secondary">by {when(a.decisionDeadline)}</p>}
-                  </td>
-                  <td className={cn(td, "font-mono")}>
-                    <span className="font-bold text-fg">{money(a.bidsCount > 0 ? a.highestBidCents : a.startingPriceCents)}</span>
-                    <p className="text-[10px] text-fg-secondary">from {money(a.startingPriceCents)}</p>
-                  </td>
-                  <td className={cn(td, "font-mono")}>
-                    {a.bidsCount}
-                    {a.leaderUsername && <span className="text-fg-secondary"> · @{a.leaderUsername}</span>}
-                  </td>
-                  <td className={cn(td, "whitespace-nowrap font-mono text-[11px]")}>
-                    {when(a.startsAt)}
-                    <p className="text-fg-secondary">→ {when(a.endsAt)}</p>
-                  </td>
-                  <td className={cn(td, "text-[11px]")}>
-                    {a.rights === "DOWNLOAD" ? "watch + download" : "watch"}
-                    <p className="text-fg-secondary">{a.settlement === "HIGHEST_BID" ? "sells automatically" : "creator decides"}</p>
-                  </td>
-                  <td className={td}>
-                    {(a.status === "OPEN" || a.status === "AWAITING_DECISION") && (
-                      <ConfirmDialog
-                        action={cancelAuction}
-                        fields={{ id: a.id }}
-                        trigger={{ label: "Cancel", tone: "danger" }}
-                        title="Cancel the auction"
-                        description={
-                          <>
-                            “{a.videoTitle}” by @{a.creatorUsername} stops now.{" "}
-                            {a.bidsCount > 0 ? <>The leading bid ({money(a.highestBidCents)}{a.leaderUsername ? ` by @${a.leaderUsername}` : ""}) is released to its bidder, who is notified.</> : <>Nobody has bid yet.</>}{" "}
-                            The video gets its previous audience back. This cannot be undone.
-                          </>
-                        }
-                        reason={{ label: "Reason (recorded)", placeholder: "Reported content under review…" }}
-                        confirmLabel="Cancel the auction"
-                      />
-                    )}
-                    {a.status !== "OPEN" && a.status !== "AWAITING_DECISION" && <span className="text-[11px] text-fg-secondary">{day(a.endsAt)}</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Panel>
+        <AuctionsTable rows={list} appUrl={appUrl} />
       )}
     </div>
   );
