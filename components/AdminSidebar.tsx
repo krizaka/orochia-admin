@@ -14,6 +14,7 @@ import {
   History,
   LayoutDashboard,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   UserCog,
   Users,
@@ -38,6 +39,7 @@ export function AdminSidebar() {
     { label: "Storage & Abuse", href: "/storage", icon: HardDrive },
     { label: "Explorer on Orazaka", href: "/explorer", icon: Sparkles },
     { label: "Operations", href: "/operations", icon: Gauge },
+    { label: "App versions", href: "/app-versions", icon: Smartphone },
     { label: "Audit log", href: "/audit", icon: History },
     { label: "Platform & Database", href: "/platform", icon: Database },
   ];

@@ -142,3 +142,54 @@ export async function setStoragePlan(_: ActionState, form: FormData) {
     return `Plan set to ${result.plan}${released ? ` — ${released} held upload(s) released` : ""}.`;
   }, { action: `storage plan → ${plan}`, target: text(form, "id") });
 }
+
+/** The apps' version parameters of one platform (krizaka/.github#75): published with a reason, bounded and audited by Orochia. */
+export async function publishAppVersion(_: ActionState, form: FormData) {
+  const platform = text(form, "platform");
+  const language = (key: string) => ({ en: text(form, `${key}.en`), fr: text(form, `${key}.fr`) });
+  const nonEmpty = (record: Record<string, string>) => Object.fromEntries(Object.entries(record).filter(([, value]) => value !== ""));
+  return attempt(
+    ["/app-versions"],
+    async () => {
+      let flags: unknown = {};
+      try {
+        flags = JSON.parse(text(form, "flags") || "{}");
+      } catch {
+        throw new ApiError(400, "Flags must be a JSON object, e.g. {\"voiceChat\": true}");
+      }
+      await orochia(`/api/admin/app-config/${platform}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          minSupportedVersion: text(form, "minSupportedVersion"),
+          latestVersion: text(form, "latestVersion"),
+          updateOverride: text(form, "updateOverride") || null,
+          storeUrl: text(form, "storeUrl") || null,
+          maintenanceOn: form.get("maintenanceOn") === "on",
+          maintenanceMessage: nonEmpty(language("maintenanceMessage")),
+          message: nonEmpty(language("message")),
+          contractMin: Number(text(form, "contractMin")),
+          contractMax: Number(text(form, "contractMax")),
+          contractSunset: text(form, "contractSunset") || null,
+          flags,
+          reason: text(form, "reason"),
+        }),
+      });
+      return `${platform} published`;
+    },
+    { action: `app versions → ${platform}`, target: platform, detail: text(form, "reason") },
+  );
+}
+
+/** Publishes an earlier revision of a platform's version parameters again, as a new one. */
+export async function rollbackAppVersion(_: ActionState, form: FormData) {
+  const platform = text(form, "platform");
+  const revision = Number(text(form, "revision"));
+  return attempt(
+    ["/app-versions"],
+    async () => {
+      await orochia(`/api/admin/app-config/${platform}/rollback`, { method: "POST", body: JSON.stringify({ revision, reason: text(form, "reason") }) });
+      return `${platform} restored to revision ${revision}`;
+    },
+    { action: `app versions → ${platform} rollback`, target: `${platform}@${revision}`, detail: text(form, "reason") },
+  );
+}
