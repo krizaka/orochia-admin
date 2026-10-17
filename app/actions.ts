@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 
 import { audit } from "@/lib/account";
+import { moderationBody } from "@/lib/conversation-moderation";
 import { ApiError, orochia } from "@/lib/orochia";
 
 /**
@@ -33,6 +34,14 @@ export async function updateReport(_: ActionState, form: FormData) {
   return attempt(["/moderation", "/"], async () => {
     await orochia(`/api/admin/reports/${text(form, "id")}`, { method: "PATCH", body: JSON.stringify({ status: text(form, "status") }) });
   }, { action: `report → ${text(form, "status")}`, target: text(form, "id") });
+}
+
+/** Acts on a reported conversation: removes a message, removes a member of a group, or closes the group. */
+export async function moderateConversation(_: ActionState, form: FormData) {
+  const action = text(form, "action");
+  return attempt(["/moderation"], async () => {
+    await orochia(`/api/admin/conversations/${text(form, "conversationId")}/moderate`, { method: "POST", body: JSON.stringify(moderationBody(action, text(form, "target"))) });
+  }, { action: `conversation: ${action}`, target: text(form, "conversationId"), detail: text(form, "reason") });
 }
 
 /** Records the outcome of a creator's 2257 review. */
