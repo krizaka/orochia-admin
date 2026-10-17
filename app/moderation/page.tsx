@@ -1,11 +1,13 @@
 import { moderateVideo, updateReport } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { cn, Empty, filter, PageTitle, Panel, td, th } from "@/components/ui";
+import { isConversationReport } from "@/lib/conversation-moderation";
 import { day,orochia } from "@/lib/orochia";
 
 interface Report {
   id: string;
   videoId: string | null;
+  messageId: string | null;
   videoTitle: string;
   reason: string;
   details: string;
@@ -96,6 +98,13 @@ export default async function ModerationPage(props: { searchParams: Promise<{ st
                         <ConfirmDialog direct action={updateReport} fields={{ id: r.id, status: "OPEN" }} trigger={{ label: "Reopen" }} />
                       )}
                     </div>
+                    {isConversationReport(r) && (
+                      <div className="mt-1.5">
+                        <a className="text-fg-accent hover:underline" href={`/moderation/conversation/${r.id}`}>
+                          Read the conversation
+                        </a>
+                      </div>
+                    )}
                     {r.videoId && r.status !== "RESOLVED" && (
                       <div className="mt-1.5">
                         <ConfirmDialog
